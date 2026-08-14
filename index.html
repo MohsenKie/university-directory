@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>سامانه اطلاعات دانشگاه</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#f3f7fc;color:#1f2937;font-family:Tahoma,Arial,sans-serif}
+.container{max-width:1200px;margin:auto;padding:18px}.card{background:#fff;border-radius:18px;padding:18px;margin-bottom:16px;box-shadow:0 8px 28px rgba(0,0,0,.07)}
+.top{display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap}h1{margin:0 0 6px;font-size:26px}.muted{color:#6b7280}
+.btn{border:0;border-radius:10px;padding:11px 15px;font:inherit;cursor:pointer}.primary{background:#1769aa;color:#fff}.gray{background:#edf2f7;color:#1f2937}.danger{background:#d9363e;color:#fff}
+.badge{background:#e8f2ff;color:#1769aa;border-radius:999px;padding:6px 10px;font-size:12px}
+.search-grid{display:grid;grid-template-columns:1fr 2fr 1.2fr auto auto;gap:10px}.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+input,select{width:100%;padding:11px;border:1px solid #d5dce5;border-radius:10px;font:inherit;background:#fff}
+.table-wrap{overflow:auto}table{width:100%;border-collapse:collapse;min-width:900px}th,td{padding:12px;border-bottom:1px solid #e6ebf0;text-align:right}th{background:#f7f9fc}
+dialog{border:0;border-radius:18px;padding:0;width:min(540px,94vw);box-shadow:0 20px 70px rgba(0,0,0,.25)}dialog::backdrop{background:rgba(0,0,0,.45)}
+.dialog-card{padding:20px}.message{padding:12px;border-radius:10px;margin-bottom:12px}.success{background:#e9f8ee}.error{background:#fdebec}
+@media(max-width:800px){.search-grid,.form-grid{grid-template-columns:1fr}.container{padding:10px}.card{padding:14px}}
+</style>
+</head>
+<body>
+<div class="container">
+<div class="card"><div class="top">
+<div><h1>سامانه اطلاعات اساتید و کارکنان دانشگاه</h1><div id="modeText" class="muted">در حال آماده‌سازی...</div></div>
+<div id="authArea"></div></div></div>
+<div id="message"></div>
+<div class="card"><div class="search-grid">
+<select id="searchType"><option value="all">جستجوی عمومی</option><option value="first_name">نام</option><option value="last_name">نام خانوادگی</option><option value="position">سمت</option></select>
+<input id="searchText" placeholder="مثلاً: مدیر گروه کامپیوتر یا فلاحی">
+<select id="department"><option value="">همه دانشکده‌ها</option></select>
+<button class="btn primary" id="searchBtn">جستجو</button><button class="btn gray" id="clearBtn">پاک کردن</button>
+</div></div>
+<div class="card"><div class="top"><h2>نتایج</h2><span id="count" class="muted"></span></div>
+<div class="table-wrap"><table><thead><tr><th>نام</th><th>سمت</th><th>دانشکده / گروه</th><th>تلفن</th><th>عملیات</th></tr></thead><tbody id="rows"></tbody></table></div>
+</div></div>
+
+<dialog id="loginDialog"><div class="dialog-card"><h2>ورود مدیر</h2>
+<p class="muted">در نسخه آنلاین از حساب Supabase استفاده می‌شود.</p>
+<form id="loginForm">
+<input id="loginEmail" type="email" placeholder="ایمیل مدیر" required style="margin-bottom:10px">
+<input id="loginPassword" type="password" placeholder="رمز عبور" required style="margin-bottom:10px">
+<button class="btn primary" style="width:100%;margin-bottom:8px">ورود</button>
+<button type="button" class="btn gray" style="width:100%" onclick="loginDialog.close()">انصراف</button>
+</form></div></dialog>
+
+<dialog id="personDialog"><div class="dialog-card"><h2 id="personTitle">افزودن شخص</h2>
+<form id="personForm"><div class="form-grid">
+<input id="firstName" placeholder="نام" required><input id="lastName" placeholder="نام خانوادگی" required>
+<input id="position" placeholder="سمت" required><input id="phone" placeholder="شماره تلفن">
+<input id="emailField" type="email" placeholder="ایمیل"><input id="departmentField" placeholder="دانشکده / گروه">
+<input id="office" placeholder="اتاق / محل کار">
+</div><div style="margin-top:12px;display:flex;gap:8px">
+<button class="btn primary" type="submit">ذخیره</button><button class="btn gray" type="button" onclick="personDialog.close()">انصراف</button>
+</div></form></div></dialog>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const SUPABASE_URL="https://zkvvyocmwuuyctmeizby.supabase.co";
+const SUPABASE_ANON_KEY="sb_publishable_Syj62cfIl4534Wffxj69rA_3SoTeHxB";
+const ONLINE_MODE=!SUPABASE_URL.includes("PASTE_")&&!SUPABASE_ANON_KEY.includes("PASTE_");
+const DEMO_ADMIN_EMAIL="admin@university.local", DEMO_ADMIN_PASSWORD="1234";
+const DEFAULT_DATA=[{"id": "1", "first_name": "محسن", "last_name": "فلاحی", "position": "مدیر گروه کامپیوتر", "phone": "09123456789", "email": "m.fallahi@university.ac.ir", "department": "مهندسی کامپیوتر", "office": "ساختمان آموزش، اتاق 205"}, {"id": "2", "first_name": "علی", "last_name": "احمدی", "position": "استاد مهندسی کامپیوتر", "phone": "09120000001", "email": "a.ahmadi@university.ac.ir", "department": "مهندسی کامپیوتر", "office": "اتاق 204"}, {"id": "3", "first_name": "سارا", "last_name": "محمدی", "position": "معاون آموزشی", "phone": "09120000002", "email": "s.mohammadi@university.ac.ir", "department": "معاونت آموزشی", "office": "ساختمان مرکزی"}];
+let localPeople=JSON.parse(localStorage.getItem("university_people")||"null")||DEFAULT_DATA;
+if(!localStorage.getItem("university_people"))localStorage.setItem("university_people",JSON.stringify(localPeople));
+const sb=ONLINE_MODE?supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY):null;
+let isAdmin=false,editingId=null;
+const $=id=>document.getElementById(id);
+
+function normalize(s){return String(s??"").replaceAll("ي","ی").replaceAll("ى","ی").replaceAll("ك","ک").replaceAll("ۀ","ه").replaceAll("ة","ه").replaceAll("ؤ","و").replaceAll("إ","ا").replaceAll("أ","ا").replaceAll("ٱ","ا").replaceAll("ئ","ی").replaceAll("\u200c"," ").replaceAll("ـ","").replace(/\s+/g," ").trim().toLowerCase()}
+function escapeHtml(s){return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]))}
+function showMessage(t,type="success"){$("message").innerHTML=`<div class="message ${type}">${escapeHtml(t)}</div>`;setTimeout(()=>$("message").innerHTML="",3500)}
+
+function renderAuth(){
+if(isAdmin){
+$("authArea").innerHTML='<span class="badge">مدیر سامانه</span> <button class="btn primary" id="addBtn">افزودن شخص</button> <button class="btn gray" id="logoutBtn">خروج</button>';
+$("addBtn").onclick=()=>openPerson();$("logoutBtn").onclick=logout;
+}else{$("authArea").innerHTML='<button class="btn gray" id="loginBtn">ورود مدیر</button>';$("loginBtn").onclick=()=>$("loginDialog").showModal()}
+}
+
+async function refreshAuth(){
+if(!ONLINE_MODE){isAdmin=localStorage.getItem("demo_admin")==="1";renderAuth();return}
+const {data:{session}}=await sb.auth.getSession();isAdmin=!!session;renderAuth();
+}
+async function logout(){if(ONLINE_MODE)await sb.auth.signOut();localStorage.removeItem("demo_admin");isAdmin=false;renderAuth();await loadPeople()}
+
+function populateDepartments(rows){const values=[...new Set(rows.map(x=>x.department).filter(Boolean))].sort();$("department").innerHTML='<option value="">همه دانشکده‌ها</option>'+values.map(x=>`<option value="${escapeHtml(x)}">${escapeHtml(x)}</option>`).join("")}
+
+function localSearch(){
+const q=normalize($("searchText").value),type=$("searchType").value,dept=normalize($("department").value);
+let rows=localPeople.filter(p=>{if(dept&&normalize(p.department)!==dept)return false;if(!q)return true;const f=type==="first_name"?[p.first_name]:type==="last_name"?[p.last_name]:type==="position"?[p.position]:[p.first_name,p.last_name,p.position,p.phone,p.email,p.department,p.office];return f.some(v=>normalize(v).includes(q))});
+rows.sort((a,b)=>normalize(a.last_name).localeCompare(normalize(b.last_name),"fa"));renderRows(rows)
+}
+async function loadPeople(){
+if(!ONLINE_MODE){populateDepartments(localPeople);localSearch();return}
+const q=normalize($("searchText").value),type=$("searchType").value,dept=$("department").value;
+let query=sb.from("people").select("*").order("last_name").order("first_name");if(dept)query=query.eq("department",dept);
+const {data,error}=await query;if(error){showMessage("خطا در دریافت اطلاعات: "+error.message,"error");return}
+let rows=data||[];if(q)rows=rows.filter(p=>{const f=type==="first_name"?[p.first_name]:type==="last_name"?[p.last_name]:type==="position"?[p.position]:[p.first_name,p.last_name,p.position,p.phone,p.email,p.department,p.office];return f.some(v=>normalize(v).includes(q))});
+populateDepartments(data||[]);renderRows(rows)
+}
+function renderRows(rows){
+$("count").textContent=`${rows.length} مورد`;
+$("rows").innerHTML=rows.map(p=>`<tr><td>${escapeHtml(p.first_name+" "+p.last_name)}</td><td>${escapeHtml(p.position)}</td><td>${escapeHtml(p.department||"")}</td><td>${escapeHtml(p.phone||"")}</td><td><button class="btn gray" onclick='showPerson(${JSON.stringify(p)})'>مشاهده</button>${isAdmin?` <button class="btn gray" onclick='openPerson(${JSON.stringify(p)})'>ویرایش</button> <button class="btn danger" onclick="deletePerson('${p.id}')">حذف</button>`:""}</td></tr>`).join("")||'<tr><td colspan="5">موردی پیدا نشد.</td></tr>'
+}
+function showPerson(p){alert(`نام: ${p.first_name} ${p.last_name}\nسمت: ${p.position}\nتلفن: ${p.phone||"ثبت نشده"}\nایمیل: ${p.email||"ثبت نشده"}\nدانشکده: ${p.department||"ثبت نشده"}\nاتاق: ${p.office||"ثبت نشده"}`)}
+
+function openPerson(p=null){editingId=p?.id||null;$("personTitle").textContent=p?"ویرایش شخص":"افزودن شخص";$("firstName").value=p?.first_name||"";$("lastName").value=p?.last_name||"";$("position").value=p?.position||"";$("phone").value=p?.phone||"";$("emailField").value=p?.email||"";$("departmentField").value=p?.department||"";$("office").value=p?.office||"";$("personDialog").showModal()}
+
+async function savePerson(e){
+e.preventDefault();const payload={first_name:$("firstName").value.trim(),last_name:$("lastName").value.trim(),position:$("position").value.trim(),phone:$("phone").value.trim(),email:$("emailField").value.trim(),department:$("departmentField").value.trim(),office:$("office").value.trim()};
+if(!payload.first_name||!payload.last_name||!payload.position){showMessage("نام، نام خانوادگی و سمت الزامی هستند.","error");return}
+if(!ONLINE_MODE){if(editingId)localPeople=localPeople.map(p=>String(p.id)===String(editingId)?{...p,...payload}:p);else localPeople.push({...payload,id:String(Date.now())});localStorage.setItem("university_people",JSON.stringify(localPeople));$("personDialog").close();await loadPeople();showMessage("اطلاعات ذخیره شد.");return}
+const result=editingId?await sb.from("people").update(payload).eq("id",editingId):await sb.from("people").insert(payload);
+if(result.error){showMessage("ذخیره انجام نشد: "+result.error.message,"error");return}
+$("personDialog").close();await loadPeople();showMessage("اطلاعات ذخیره شد.")
+}
+
+async function deletePerson(id){
+if(!confirm("آیا از حذف این شخص مطمئن هستید؟"))return
+if(!ONLINE_MODE){localPeople=localPeople.filter(p=>String(p.id)!==String(id));localStorage.setItem("university_people",JSON.stringify(localPeople));await loadPeople();showMessage("شخص حذف شد.");return}
+const {error}=await sb.from("people").delete().eq("id",id);if(error){showMessage("حذف انجام نشد: "+error.message,"error");return}await loadPeople();showMessage("شخص حذف شد.")
+}
+
+$("loginForm").onsubmit=async e=>{
+e.preventDefault()
+if(!ONLINE_MODE){
+if($("loginEmail").value.trim()===DEMO_ADMIN_EMAIL&&$("loginPassword").value===DEMO_ADMIN_PASSWORD){localStorage.setItem("demo_admin","1");$("loginDialog").close();isAdmin=true;renderAuth();await loadPeople();showMessage("ورود مدیر موفق بود.")}else showMessage("در حالت محلی: ایمیل admin@university.local و رمز 1234 است.","error");return}
+const {error}=await sb.auth.signInWithPassword({email:$("loginEmail").value.trim(),password:$("loginPassword").value});if(error){showMessage("ورود مدیر ناموفق بود: "+error.message,"error");return}$("loginDialog").close();await refreshAuth();await loadPeople();showMessage("ورود مدیر موفق بود.")
+}
+$("personForm").onsubmit=savePerson;$("searchBtn").onclick=loadPeople;$("clearBtn").onclick=()=>{$("searchText").value="";$("searchType").value="all";$("department").value="";loadPeople()};$("searchText").addEventListener("keydown",e=>{if(e.key==="Enter")loadPeople()})
+async function init(){$("modeText").textContent=ONLINE_MODE?"داده‌ها مشترک و آنلاین هستند.":"نسخه آماده است؛ برای آنلاین شدن Supabase را تنظیم کنید.";await refreshAuth();await loadPeople();if(ONLINE_MODE)sb.auth.onAuthStateChange(async()=>{await refreshAuth();await loadPeople()})}
+init()
+</script>
+</body></html>
