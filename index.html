@@ -15,23 +15,66 @@ input,select{width:100%;padding:11px;border:1px solid #d5dce5;border-radius:10px
 .table-wrap{overflow:auto}table{width:100%;border-collapse:collapse;min-width:900px}th,td{padding:12px;border-bottom:1px solid #e6ebf0;text-align:right}th{background:#f7f9fc}
 dialog{border:0;border-radius:18px;padding:0;width:min(540px,94vw);box-shadow:0 20px 70px rgba(0,0,0,.25)}dialog::backdrop{background:rgba(0,0,0,.45)}
 .dialog-card{padding:20px}.message{padding:12px;border-radius:10px;margin-bottom:12px}.success{background:#e9f8ee}.error{background:#fdebec}
-@media(max-width:800px){.search-grid,.form-grid{grid-template-columns:1fr}.container{padding:10px}.card{padding:14px}}
+
+/* Professional responsive UI */
+.header-card{background:linear-gradient(135deg,#ffffff 0%,#f8fbff 100%)}
+.header-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.toolbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.search-card{position:sticky;top:10px;z-index:5}
+.results-header{margin-bottom:12px}
+.results-meta{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.count-badge{background:#f1f5f9;border-radius:999px;padding:6px 10px;color:#475569;font-size:13px}
+.desktop-table{display:block}
+.mobile-results{display:none}
+.person-card-mobile{background:#fff;border:1px solid #e6ebf0;border-radius:16px;padding:15px;margin-bottom:10px;box-shadow:0 4px 15px rgba(0,0,0,.04)}
+.person-row{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}
+.person-main{min-width:0}
+.person-name{font-size:17px;font-weight:700;margin:0 0 6px}
+.person-position{font-size:13px;color:#475569;margin-bottom:10px}
+.person-dept{font-size:12px;color:#64748b}
+.person-actions{display:flex;gap:7px;margin-top:13px;flex-wrap:wrap}
+.icon-btn{min-width:44px}
+.profile-avatar{width:66px;height:66px;border-radius:18px;background:linear-gradient(135deg,#1769aa,#3b82f6);color:white;display:flex;align-items:center;justify-content:center;font-size:23px;font-weight:700;flex:0 0 auto}
+.detail-dialog{width:min(700px,94vw);max-height:90vh}
+.detail-wrap{padding:0}
+.detail-head{padding:22px;background:linear-gradient(135deg,#1769aa,#3b82f6);color:white;border-radius:18px 18px 0 0}
+.detail-head-row{display:flex;gap:16px;align-items:center}
+.detail-avatar{width:82px;height:82px;border-radius:24px;background:rgba(255,255,255,.18);display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:700;border:1px solid rgba(255,255,255,.3)}
+.detail-name{margin:0 0 5px;font-size:23px}.detail-position{margin:0;opacity:.9;font-size:14px}
+.detail-body{padding:22px}
+.info-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.info-item{border:1px solid #e8edf2;border-radius:13px;padding:13px;background:#fafcfe}
+.info-label{font-size:12px;color:#64748b;margin-bottom:5px}.info-value{font-size:14px;word-break:break-word}
+.info-value a{color:#1769aa;text-decoration:none}.detail-actions{display:flex;gap:8px;margin-top:18px;flex-wrap:wrap}
+.close-x{float:left;border:0;background:rgba(255,255,255,.15);color:#fff;width:38px;height:38px;border-radius:11px;font-size:20px;cursor:pointer}
+.empty-state{text-align:center;padding:36px 15px;color:#64748b}
+.empty-icon{font-size:38px;margin-bottom:10px}
+@media(max-width:800px){
+ .search-grid,.form-grid,.info-grid{grid-template-columns:1fr}
+ .container{padding:10px}.card{padding:14px}.search-card{position:static}
+ .desktop-table{display:none}.mobile-results{display:block}
+ .header-actions{width:100%}.header-actions .btn{flex:1}
+ .detail-head{border-radius:16px 16px 0 0}.detail-body{padding:16px}
+ .detail-name{font-size:20px}.detail-position{font-size:13px}
+ .top h1{font-size:21px}
+}
+
 </style>
 </head>
 <body>
 <div class="container">
-<div class="card"><div class="top">
+<div class="card header-card"><div class="top">
 <div><h1>سامانه اطلاعات اساتید و کارکنان دانشگاه</h1><div id="modeText" class="muted">در حال آماده‌سازی...</div></div>
 <div id="authArea"></div></div></div>
 <div id="message"></div>
-<div class="card"><div class="search-grid">
+<div class="card search-card"><div class="search-grid">
 <select id="searchType"><option value="all">جستجوی عمومی</option><option value="first_name">نام</option><option value="last_name">نام خانوادگی</option><option value="position">سمت</option></select>
 <input id="searchText" placeholder="مثلاً: مدیر گروه کامپیوتر یا فلاحی">
 <select id="department"><option value="">همه دانشکده‌ها</option></select>
 <button class="btn primary" id="searchBtn">جستجو</button><button class="btn gray" id="clearBtn">پاک کردن</button>
 </div></div>
-<div class="card"><div class="top"><h2>نتایج</h2><span id="count" class="muted"></span></div>
-<div class="table-wrap"><table><thead><tr><th>نام</th><th>سمت</th><th>دانشکده / گروه</th><th>تلفن</th><th>عملیات</th></tr></thead><tbody id="rows"></tbody></table></div>
+<div class="card"><div class="top results-header"><div class="results-meta"><h2>نتایج</h2><span id="count" class="count-badge"></span></div></div>
+<div class="desktop-table"><div class="table-wrap"><table><thead><tr><th>نام</th><th>سمت</th><th>دانشکده / گروه</th><th>تلفن</th><th>عملیات</th></tr></thead><tbody id="rows"></tbody></table></div>
 </div></div>
 
 <dialog id="loginDialog"><div class="dialog-card"><h2>ورود مدیر</h2>
@@ -43,7 +86,11 @@ dialog{border:0;border-radius:18px;padding:0;width:min(540px,94vw);box-shadow:0 
 <button type="button" class="btn gray" style="width:100%" onclick="loginDialog.close()">انصراف</button>
 </form></div></dialog>
 
-<dialog id="personDialog"><div class="dialog-card"><h2 id="personTitle">افزودن شخص</h2>
+<dialog id="detailDialog" class="detail-dialog">
+  <div id="detailContent"></div>
+</dialog>
+
+<dialog id="personDialog" class="detail-dialog"><div class="dialog-card"><h2 id="personTitle">افزودن شخص</h2>
 <form id="personForm"><div class="form-grid">
 <input id="firstName" placeholder="نام" required><input id="lastName" placeholder="نام خانوادگی" required>
 <input id="position" placeholder="سمت" required><input id="phone" placeholder="شماره تلفن">
@@ -98,11 +145,97 @@ const {data,error}=await query;if(error){showMessage("خطا در دریافت �
 let rows=data||[];if(q)rows=rows.filter(p=>{const f=type==="first_name"?[p.first_name]:type==="last_name"?[p.last_name]:type==="position"?[p.position]:[p.first_name,p.last_name,p.position,p.phone,p.email,p.department,p.office];return f.some(v=>normalize(v).includes(q))});
 populateDepartments(data||[]);renderRows(rows)
 }
-function renderRows(rows){
-$("count").textContent=`${rows.length} مورد`;
-$("rows").innerHTML=rows.map(p=>`<tr><td>${escapeHtml(p.first_name+" "+p.last_name)}</td><td>${escapeHtml(p.position)}</td><td>${escapeHtml(p.department||"")}</td><td>${escapeHtml(p.phone||"")}</td><td><button class="btn gray" onclick='showPerson(${JSON.stringify(p)})'>مشاهده</button>${isAdmin?` <button class="btn gray" onclick='openPerson(${JSON.stringify(p)})'>ویرایش</button> <button class="btn danger" onclick="deletePerson('${p.id}')">حذف</button>`:""}</td></tr>`).join("")||'<tr><td colspan="5">موردی پیدا نشد.</td></tr>'
+let peopleById = {};
+
+function getInitials(p){
+  const a = (p.first_name || "").trim().charAt(0);
+  const b = (p.last_name || "").trim().charAt(0);
+  return (a + b) || "؟";
 }
-function showPerson(p){alert(`نام: ${p.first_name} ${p.last_name}\nسمت: ${p.position}\nتلفن: ${p.phone||"ثبت نشده"}\nایمیل: ${p.email||"ثبت نشده"}\nدانشکده: ${p.department||"ثبت نشده"}\nاتاق: ${p.office||"ثبت نشده"}`)}
+
+function renderRows(rows){
+  peopleById = {};
+  rows.forEach(p => { peopleById[String(p.id)] = p; });
+
+  $("count").textContent = `${rows.length} مورد`;
+
+  if(!rows.length){
+    $("rows").innerHTML = '<tr><td colspan="5"><div class="empty-state"><div class="empty-icon">🔎</div><div>موردی پیدا نشد.</div><div class="muted">عبارت جستجو یا فیلتر دانشکده را تغییر دهید.</div></div></td></tr>';
+    $("mobileResults").innerHTML = '<div class="empty-state"><div class="empty-icon">🔎</div><div>موردی پیدا نشد.</div><div class="muted">عبارت جستجو یا فیلتر دانشکده را تغییر دهید.</div></div>';
+    return;
+  }
+
+  $("rows").innerHTML = rows.map(p => `
+    <tr>
+      <td><strong>${escapeHtml(p.first_name + " " + p.last_name)}</strong></td>
+      <td>${escapeHtml(p.position)}</td>
+      <td>${escapeHtml(p.department || "")}</td>
+      <td>${p.phone ? `<a href="tel:${escapeHtml(p.phone)}" style="color:#1769aa;text-decoration:none">${escapeHtml(p.phone)}</a>` : "—"}</td>
+      <td>
+        <button class="btn gray" onclick="showPersonById('${String(p.id)}')">مشاهده</button>
+        ${isAdmin ? `<button class="btn gray" onclick="openPersonById('${String(p.id)}')">ویرایش</button> <button class="btn danger" onclick="deletePerson('${String(p.id)}')">حذف</button>` : ""}
+      </td>
+    </tr>`).join("");
+
+  $("mobileResults").innerHTML = rows.map(p => `
+    <div class="person-card-mobile">
+      <div class="person-row">
+        <div class="profile-avatar">${escapeHtml(getInitials(p))}</div>
+        <div class="person-main">
+          <div class="person-name">${escapeHtml(p.first_name + " " + p.last_name)}</div>
+          <div class="person-position">${escapeHtml(p.position)}</div>
+          <div class="person-dept">${escapeHtml(p.department || "دانشکده ثبت نشده")}</div>
+        </div>
+      </div>
+      <div class="person-actions">
+        <button class="btn primary" onclick="showPersonById('${String(p.id)}')">مشاهده اطلاعات</button>
+        ${p.phone ? `<a class="btn gray" href="tel:${escapeHtml(p.phone)}">تماس</a>` : ""}
+        ${p.email ? `<a class="btn gray" href="mailto:${escapeHtml(p.email)}">ایمیل</a>` : ""}
+        ${isAdmin ? `<button class="btn gray" onclick="openPersonById('${String(p.id)}')">ویرایش</button><button class="btn danger" onclick="deletePerson('${String(p.id)}')">حذف</button>` : ""}
+      </div>
+    </div>`).join("");
+}
+
+function showPersonById(id){
+  const p = peopleById[String(id)];
+  if(!p) return;
+
+  const fullName = `${p.first_name || ""} ${p.last_name || ""}`.trim();
+  const detail = $("detailContent");
+  detail.innerHTML = `
+    <div class="detail-wrap">
+      <div class="detail-head">
+        <button class="close-x" onclick="$('detailDialog').close()">×</button>
+        <div class="detail-head-row">
+          <div class="detail-avatar">${escapeHtml(getInitials(p))}</div>
+          <div>
+            <h2 class="detail-name">${escapeHtml(fullName)}</h2>
+            <p class="detail-position">${escapeHtml(p.position || "سمت ثبت نشده")}</p>
+          </div>
+        </div>
+      </div>
+      <div class="detail-body">
+        <div class="info-grid">
+          <div class="info-item"><div class="info-label">سمت</div><div class="info-value">${escapeHtml(p.position || "ثبت نشده")}</div></div>
+          <div class="info-item"><div class="info-label">دانشکده / گروه</div><div class="info-value">${escapeHtml(p.department || "ثبت نشده")}</div></div>
+          <div class="info-item"><div class="info-label">شماره تلفن</div><div class="info-value">${p.phone ? `<a href="tel:${escapeHtml(p.phone)}">${escapeHtml(p.phone)}</a>` : "ثبت نشده"}</div></div>
+          <div class="info-item"><div class="info-label">ایمیل</div><div class="info-value">${p.email ? `<a href="mailto:${escapeHtml(p.email)}">${escapeHtml(p.email)}</a>` : "ثبت نشده"}</div></div>
+          <div class="info-item" style="grid-column:1/-1"><div class="info-label">اتاق / محل کار</div><div class="info-value">${escapeHtml(p.office || "ثبت نشده")}</div></div>
+        </div>
+        <div class="detail-actions">
+          ${p.phone ? `<a class="btn primary" href="tel:${escapeHtml(p.phone)}">📞 تماس</a>` : ""}
+          ${p.email ? `<a class="btn gray" href="mailto:${escapeHtml(p.email)}">✉️ ارسال ایمیل</a>` : ""}
+          <button class="btn gray" onclick="$('detailDialog').close()">بستن</button>
+        </div>
+      </div>
+    </div>`;
+  $("detailDialog").showModal();
+}
+
+function openPersonById(id){
+  const p = peopleById[String(id)];
+  if(p) openPerson(p);
+}
 
 function openPerson(p=null){editingId=p?.id||null;$("personTitle").textContent=p?"ویرایش شخص":"افزودن شخص";$("firstName").value=p?.first_name||"";$("lastName").value=p?.last_name||"";$("position").value=p?.position||"";$("phone").value=p?.phone||"";$("emailField").value=p?.email||"";$("departmentField").value=p?.department||"";$("office").value=p?.office||"";$("personDialog").showModal()}
 
