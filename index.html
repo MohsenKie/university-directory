@@ -59,6 +59,27 @@ dialog{border:0;border-radius:18px;padding:0;width:min(540px,94vw);box-shadow:0 
  .top h1{font-size:21px}
 }
 
+
+/* ===== Photo upload / preview ===== */
+.photo-field{grid-column:1/-1}
+.photo-preview{display:flex;align-items:center;gap:12px;margin-top:8px}
+.photo-preview img{width:78px;height:78px;object-fit:cover;border-radius:18px;border:1px solid #e5eaf0}
+.photo-empty{width:78px;height:78px;border-radius:18px;background:#eef3f8;display:flex;align-items:center;justify-content:center;color:#64748b;font-size:12px}
+
+/* ===== Footer ===== */
+.site-footer{margin-top:28px;background:#0f172a;color:#fff;border-radius:22px;padding:26px 22px}
+.footer-grid{display:grid;grid-template-columns:1.3fr 1fr 1fr;gap:24px}
+.footer-title{font-size:18px;font-weight:800;margin-bottom:10px}
+.footer-text{color:#cbd5e1;font-size:13px;line-height:1.9}
+.footer-links{display:flex;flex-direction:column;gap:8px}
+.footer-links a{color:#e2e8f0;text-decoration:none;font-size:13px}
+.footer-links a:hover{color:#fff;text-decoration:underline}
+.footer-divider{height:1px;background:rgba(255,255,255,.12);margin:20px 0 14px}
+.footer-bottom{display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap;color:#94a3b8;font-size:12px}
+.creator{color:#e2e8f0;font-weight:700}
+.profile-avatar.has-photo,.detail-avatar.has-photo{overflow:hidden;padding:0}
+.profile-avatar.has-photo img,.detail-avatar.has-photo img{width:100%;height:100%;object-fit:cover}
+@media(max-width:800px){.footer-grid{grid-template-columns:1fr}.site-footer{padding:20px 16px}}
 </style>
 </head>
 <body>
@@ -96,6 +117,11 @@ dialog{border:0;border-radius:18px;padding:0;width:min(540px,94vw);box-shadow:0 
 <input id="position" placeholder="سمت" required><input id="phone" placeholder="شماره تلفن">
 <input id="emailField" type="email" placeholder="ایمیل"><input id="departmentField" placeholder="دانشکده / گروه">
 <input id="office" placeholder="اتاق / محل کار">
+<input id="photoFile" class="photo-field" type="file" accept="image/png,image/jpeg,image/webp">
+<div class="photo-preview photo-field">
+  <div id="photoPreviewBox" class="photo-empty">بدون تصویر</div>
+  <div class="muted" style="font-size:12px">تصویر استاد را انتخاب کنید (PNG / JPG / WEBP)</div>
+</div>
 </div><div style="margin-top:12px;display:flex;gap:8px">
 <button class="btn primary" type="submit">ذخیره</button><button class="btn gray" type="button" onclick="personDialog.close()">انصراف</button>
 </div></form></div></dialog>
@@ -180,7 +206,7 @@ function renderRows(rows){
   $("mobileResults").innerHTML = rows.map(p => `
     <div class="person-card-mobile">
       <div class="person-row">
-        <div class="profile-avatar">${escapeHtml(getInitials(p))}</div>
+        ${p.photo ? `<div class="profile-avatar has-photo"><img src="${escapeHtml(p.photo)}" alt=""></div>` : `<div class="profile-avatar">${escapeHtml(getInitials(p))}</div>`}
         <div class="person-main">
           <div class="person-name">${escapeHtml(p.first_name + " " + p.last_name)}</div>
           <div class="person-position">${escapeHtml(p.position)}</div>
@@ -196,6 +222,16 @@ function renderRows(rows){
     </div>`).join("");
 }
 
+
+function readLocalImage(file){
+  return new Promise((resolve,reject)=>{
+    const reader=new FileReader();
+    reader.onload=()=>resolve(reader.result);
+    reader.onerror=()=>reject(new Error("خواندن تصویر انجام نشد."));
+    reader.readAsDataURL(file);
+  });
+}
+
 function showPersonById(id){
   const p = peopleById[String(id)];
   if(!p) return;
@@ -207,7 +243,7 @@ function showPersonById(id){
       <div class="detail-head">
         <button class="close-x" onclick="$('detailDialog').close()">×</button>
         <div class="detail-head-row">
-          <div class="detail-avatar">${escapeHtml(getInitials(p))}</div>
+          ${p.photo ? `<div class="detail-avatar has-photo"><img src="${escapeHtml(p.photo)}" alt=""></div>` : `<div class="detail-avatar">${escapeHtml(getInitials(p))}</div>`}
           <div>
             <h2 class="detail-name">${escapeHtml(fullName)}</h2>
             <p class="detail-position">${escapeHtml(p.position || "سمت ثبت نشده")}</p>
@@ -237,15 +273,105 @@ function openPersonById(id){
   if(p) openPerson(p);
 }
 
-function openPerson(p=null){editingId=p?.id||null;$("personTitle").textContent=p?"ویرایش شخص":"افزودن شخص";$("firstName").value=p?.first_name||"";$("lastName").value=p?.last_name||"";$("position").value=p?.position||"";$("phone").value=p?.phone||"";$("emailField").value=p?.email||"";$("departmentField").value=p?.department||"";$("office").value=p?.office||"";$("personDialog").showModal()}
+function openPerson(p=null){
+  editingId=p?.id||null;
+  $("personTitle").textContent=p?"ویرایش شخص":"افزودن شخص";
+  $("firstName").value=p?.first_name||"";
+  $("lastName").value=p?.last_name||"";
+  $("position").value=p?.position||"";
+  $("phone").value=p?.phone||"";
+  $("emailField").value=p?.email||"";
+  $("departmentField").value=p?.department||"";
+  $("office").value=p?.office||"";
+  $("photoFile").value="";
+  const box=$("photoPreviewBox");
+  if(p?.photo){
+    box.className=""; box.innerHTML=`<img src="${escapeHtml(p.photo)}" alt="">`;
+  }else{
+    box.className="photo-empty"; box.textContent="بدون تصویر";
+  }
+  $("personDialog").showModal();
+}
+
+
+async function uploadTeacherPhoto(file){
+  if(!file) return null;
+  if(!ONLINE_MODE) return null;
+
+  const allowed = ["image/png","image/jpeg","image/webp"];
+  if(!allowed.includes(file.type)) throw new Error("فرمت تصویر مجاز نیست.");
+  if(file.size > 3 * 1024 * 1024) throw new Error("حجم تصویر باید کمتر از 3 مگابایت باشد.");
+
+  const ext = file.name.split(".").pop().toLowerCase() || "jpg";
+  const safeId = editingId || crypto.randomUUID();
+  const path = `teachers/${safeId}-${Date.now()}.${ext}`;
+
+  const {error: uploadError} = await sb.storage.from("teacher-photos").upload(path, file, {
+    cacheControl: "3600",
+    upsert: true,
+    contentType: file.type
+  });
+  if(uploadError) throw uploadError;
+
+  const {data} = sb.storage.from("teacher-photos").getPublicUrl(path);
+  return data.publicUrl;
+}
 
 async function savePerson(e){
-e.preventDefault();const payload={first_name:$("firstName").value.trim(),last_name:$("lastName").value.trim(),position:$("position").value.trim(),phone:$("phone").value.trim(),email:$("emailField").value.trim(),department:$("departmentField").value.trim(),office:$("office").value.trim()};
-if(!payload.first_name||!payload.last_name||!payload.position){showMessage("نام، نام خانوادگی و سمت الزامی هستند.","error");return}
-if(!ONLINE_MODE){if(editingId)localPeople=localPeople.map(p=>String(p.id)===String(editingId)?{...p,...payload}:p);else localPeople.push({...payload,id:String(Date.now())});localStorage.setItem("university_people",JSON.stringify(localPeople));$("personDialog").close();await loadPeople();showMessage("اطلاعات ذخیره شد.");return}
-const result=editingId?await sb.from("people").update(payload).eq("id",editingId):await sb.from("people").insert(payload);
-if(result.error){showMessage("ذخیره انجام نشد: "+result.error.message,"error");return}
-$("personDialog").close();await loadPeople();showMessage("اطلاعات ذخیره شد.")
+  e.preventDefault();
+
+  const payload={
+    first_name:$("firstName").value.trim(),
+    last_name:$("lastName").value.trim(),
+    position:$("position").value.trim(),
+    phone:$("phone").value.trim(),
+    email:$("emailField").value.trim(),
+    department:$("departmentField").value.trim(),
+    office:$("office").value.trim()
+  };
+
+  if(!payload.first_name||!payload.last_name||!payload.position){
+    showMessage("نام، نام خانوادگی و سمت الزامی هستند.","error");
+    return;
+  }
+
+  try{
+    const file=$("photoFile").files[0] || null;
+
+    if(!ONLINE_MODE){
+      if(editingId){
+        const old=localPeople.find(p=>String(p.id)===String(editingId));
+        payload.photo = file ? await readLocalImage(file) : (old?.photo || "");
+        localPeople=localPeople.map(p=>String(p.id)===String(editingId)?{...p,...payload}:p);
+      }else{
+        payload.photo = file ? await readLocalImage(file) : "";
+        localPeople.push({...payload,id:String(Date.now())});
+      }
+
+      localStorage.setItem("university_people",JSON.stringify(localPeople));
+      $("personDialog").close();
+      await loadPeople();
+      showMessage("اطلاعات ذخیره شد.");
+      return;
+    }
+
+    if(file){
+      payload.photo = await uploadTeacherPhoto(file);
+    }
+
+    const result=editingId
+      ? await sb.from("people").update(payload).eq("id",editingId)
+      : await sb.from("people").insert(payload);
+
+    if(result.error) throw result.error;
+
+    $("personDialog").close();
+    await loadPeople();
+    showMessage("اطلاعات ذخیره شد.");
+  }catch(error){
+    console.error(error);
+    showMessage("ذخیره انجام نشد: "+(error.message||"خطای نامشخص"),"error");
+  }
 }
 
 async function deletePerson(id){
@@ -261,6 +387,23 @@ if($("loginEmail").value.trim()===DEMO_ADMIN_EMAIL&&$("loginPassword").value===D
 const {error}=await sb.auth.signInWithPassword({email:$("loginEmail").value.trim(),password:$("loginPassword").value});if(error){showMessage("ورود مدیر ناموفق بود: "+error.message,"error");return}$("loginDialog").close();await refreshAuth();await loadPeople();showMessage("ورود مدیر موفق بود.")
 }
 $("personForm").onsubmit=savePerson;$("searchBtn").onclick=loadPeople;$("clearBtn").onclick=()=>{$("searchText").value="";$("searchType").value="all";$("department").value="";loadPeople()};$("searchText").addEventListener("keydown",e=>{if(e.key==="Enter")loadPeople()})
+
+$("photoFile").addEventListener("change", function(){
+  const file=this.files[0];
+  const box=$("photoPreviewBox");
+  if(!file){
+    box.className="photo-empty";
+    box.textContent="بدون تصویر";
+    return;
+  }
+  const reader=new FileReader();
+  reader.onload=()=>{
+    box.className="";
+    box.innerHTML=`<img src="${reader.result}" alt="">`;
+  };
+  reader.readAsDataURL(file);
+});
+
 async function init(){$("modeText").textContent=ONLINE_MODE?"داده‌ها مشترک و آنلاین هستند.":"نسخه آماده است؛ برای آنلاین شدن Supabase را تنظیم کنید.";await refreshAuth();await loadPeople();if(ONLINE_MODE)sb.auth.onAuthStateChange(async()=>{await refreshAuth();await loadPeople()})}
 init()
 </script>
