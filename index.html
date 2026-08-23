@@ -1,410 +1,2435 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="fa" dir="rtl">
+
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>سامانه اطلاعات دانشگاه</title>
-<style>
-*{box-sizing:border-box}body{margin:0;background:#f3f7fc;color:#1f2937;font-family:Tahoma,Arial,sans-serif}
-.container{max-width:1200px;margin:auto;padding:18px}.card{background:#fff;border-radius:18px;padding:18px;margin-bottom:16px;box-shadow:0 8px 28px rgba(0,0,0,.07)}
-.top{display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap}h1{margin:0 0 6px;font-size:26px}.muted{color:#6b7280}
-.btn{border:0;border-radius:10px;padding:11px 15px;font:inherit;cursor:pointer}.primary{background:#1769aa;color:#fff}.gray{background:#edf2f7;color:#1f2937}.danger{background:#d9363e;color:#fff}
-.badge{background:#e8f2ff;color:#1769aa;border-radius:999px;padding:6px 10px;font-size:12px}
-.search-grid{display:grid;grid-template-columns:1fr 2fr 1.2fr auto auto;gap:10px}.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-input,select{width:100%;padding:11px;border:1px solid #d5dce5;border-radius:10px;font:inherit;background:#fff}
-.table-wrap{overflow:auto}table{width:100%;border-collapse:collapse;min-width:900px}th,td{padding:12px;border-bottom:1px solid #e6ebf0;text-align:right}th{background:#f7f9fc}
-dialog{border:0;border-radius:18px;padding:0;width:min(540px,94vw);box-shadow:0 20px 70px rgba(0,0,0,.25)}dialog::backdrop{background:rgba(0,0,0,.45)}
-.dialog-card{padding:20px}.message{padding:12px;border-radius:10px;margin-bottom:12px}.success{background:#e9f8ee}.error{background:#fdebec}
+  
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+  <title>سامانه اطلاعات اساتید و کارکنان دانشگاه</title>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://cdn.jsdelivr.net/npm/vazirmatn@33.0.3/Vazirmatn-font-face.css" rel="stylesheet" type="text/css" />
+  <!-- Boot Strap -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <style>
+    /* ============================================================
+   Design Tokens — همه بخش‌ها (Header / Search / Results / Modal / Footer)
+   از همین توکن‌ها استفاده می‌کنند.
+   ============================================================ */
+    :root {
+      --color-bg: #FAF6F7;
+      --color-surface: #FFFFFF;
+      --color-surface-soft: #F7ECEF;
+      --color-border: #ECDDE1;
+      --color-text: #20141A;
+      --color-text-soft: #5B6478;
+      --color-text-faint: #8A93A6;
+      --color-primary: #D6145F;
+      --color-primary-dark: #970F45;
+      --color-primary-soft: #FBE4EC;
+      --color-wine-950: #2B0A1C;
+      --color-success: #1D9A6C;
+      --color-success-soft: #E4F6EE;
+      --color-danger: #DC4545;
+      --color-danger-soft: #FCEAEA;
+      --color-amber: #C67C1E;
 
-/* Professional responsive UI */
-.header-card{background:linear-gradient(135deg,#ffffff 0%,#f8fbff 100%)}
-.header-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-.toolbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
-.search-card{position:sticky;top:10px;z-index:5}
-.results-header{margin-bottom:12px}
-.results-meta{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-.count-badge{background:#f1f5f9;border-radius:999px;padding:6px 10px;color:#475569;font-size:13px}
-.desktop-table{display:block}
-.mobile-results{display:none}
-.person-card-mobile{background:#fff;border:1px solid #e6ebf0;border-radius:16px;padding:15px;margin-bottom:10px;box-shadow:0 4px 15px rgba(0,0,0,.04)}
-.person-row{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}
-.person-main{min-width:0}
-.person-name{font-size:17px;font-weight:700;margin:0 0 6px}
-.person-position{font-size:13px;color:#475569;margin-bottom:10px}
-.person-dept{font-size:12px;color:#64748b}
-.person-actions{display:flex;gap:7px;margin-top:13px;flex-wrap:wrap}
-.icon-btn{min-width:44px}
-.profile-avatar{width:66px;height:66px;border-radius:18px;background:linear-gradient(135deg,#1769aa,#3b82f6);color:white;display:flex;align-items:center;justify-content:center;font-size:23px;font-weight:700;flex:0 0 auto}
-.detail-dialog{width:min(700px,94vw);max-height:90vh}
-.detail-wrap{padding:0}
-.detail-head{padding:22px;background:linear-gradient(135deg,#1769aa,#3b82f6);color:white;border-radius:18px 18px 0 0}
-.detail-head-row{display:flex;gap:16px;align-items:center}
-.detail-avatar{width:82px;height:82px;border-radius:24px;background:rgba(255,255,255,.18);display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:700;border:1px solid rgba(255,255,255,.3)}
-.detail-name{margin:0 0 5px;font-size:23px}.detail-position{margin:0;opacity:.9;font-size:14px}
-.detail-body{padding:22px}
-.info-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.info-item{border:1px solid #e8edf2;border-radius:13px;padding:13px;background:#fafcfe}
-.info-label{font-size:12px;color:#64748b;margin-bottom:5px}.info-value{font-size:14px;word-break:break-word}
-.info-value a{color:#1769aa;text-decoration:none}.detail-actions{display:flex;gap:8px;margin-top:18px;flex-wrap:wrap}
-.close-x{float:left;border:0;background:rgba(255,255,255,.15);color:#fff;width:38px;height:38px;border-radius:11px;font-size:20px;cursor:pointer}
-.empty-state{text-align:center;padding:36px 15px;color:#64748b}
-.empty-icon{font-size:38px;margin-bottom:10px}
-@media(max-width:800px){
- .search-grid,.form-grid,.info-grid{grid-template-columns:1fr}
- .container{padding:10px}.card{padding:14px}.search-card{position:static}
- .desktop-table{display:none}.mobile-results{display:block}
- .header-actions{width:100%}.header-actions .btn{flex:1}
- .detail-head{border-radius:16px 16px 0 0}.detail-body{padding:16px}
- .detail-name{font-size:20px}.detail-position{font-size:13px}
- .top h1{font-size:21px}
-}
+      --radius-sm: 10px;
+      --radius-md: 16px;
+      --radius-lg: 22px;
+      --radius-pill: 999px;
 
+      --shadow-sm: 0 1px 2px rgba(23, 35, 64, .06), 0 1px 1px rgba(23, 35, 64, .04);
+      --shadow-md: 0 8px 24px rgba(23, 35, 64, .08), 0 2px 6px rgba(23, 35, 64, .05);
+      --shadow-lg: 0 20px 48px rgba(23, 35, 64, .16);
 
-/* ===== Photo upload / preview ===== */
-.photo-field{grid-column:1/-1}
-.photo-preview{display:flex;align-items:center;gap:12px;margin-top:8px}
-.photo-preview img{width:78px;height:78px;object-fit:cover;border-radius:18px;border:1px solid #e5eaf0}
-.photo-empty{width:78px;height:78px;border-radius:18px;background:#eef3f8;display:flex;align-items:center;justify-content:center;color:#64748b;font-size:12px}
+      --font-main: 'Vazirmatn', Tahoma, Arial, sans-serif;
 
-/* ===== Footer ===== */
-.site-footer{margin-top:28px;background:#0f172a;color:#fff;border-radius:22px;padding:26px 22px}
-.footer-grid{display:grid;grid-template-columns:1.3fr 1fr 1fr;gap:24px}
-.footer-title{font-size:18px;font-weight:800;margin-bottom:10px}
-.footer-text{color:#cbd5e1;font-size:13px;line-height:1.9}
-.footer-links{display:flex;flex-direction:column;gap:8px}
-.footer-links a{color:#e2e8f0;text-decoration:none;font-size:13px}
-.footer-links a:hover{color:#fff;text-decoration:underline}
-.footer-divider{height:1px;background:rgba(255,255,255,.12);margin:20px 0 14px}
-.footer-bottom{display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap;color:#94a3b8;font-size:12px}
-.creator{color:#e2e8f0;font-weight:700}
-.profile-avatar.has-photo,.detail-avatar.has-photo{overflow:hidden;padding:0}
-.profile-avatar.has-photo img,.detail-avatar.has-photo img{width:100%;height:100%;object-fit:cover}
-@media(max-width:800px){.footer-grid{grid-template-columns:1fr}.site-footer{padding:20px 16px}}
-</style>
+      --dept-1: #2F5FE0;
+      --dept-1-soft: #E8EEFD;
+      --dept-2: #0F8F72;
+      --dept-2-soft: #E1F6EF;
+      --dept-3: #8A4FD1;
+      --dept-3-soft: #F1E9FB;
+      --dept-4: #C6791E;
+      --dept-4-soft: #FBEEDC;
+      --dept-5: #565F1E;
+      --dept-5-soft: #EFF3DC;
+      --dept-6: #3E8FB0;
+      --dept-6-soft: #E4F3F8;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: var(--font-main);
+      background: var(--color-bg);
+      color: var(--color-text);
+      min-height: 100vh;
+      overflow-x: hidden;
+      line-height: 1.6;
+    }
+
+    img {
+      max-width: 100%;
+      display: block;
+    }
+
+    button {
+      font-family: inherit;
+      cursor: pointer;
+    }
+
+    input,
+    select,
+    textarea {
+      font-family: inherit;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 0 20px;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      border: 0;
+    }
+
+    /* ============================================================
+   Header
+   ============================================================ */
+    .site-header {
+      background: linear-gradient(160deg, var(--color-primary) 0%, var(--color-primary-dark) 60%, var(--color-wine-950) 100%);
+      position: relative;
+      padding: 28px 0 34px;
+      
+    }
+
+    .site-header::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background-image: radial-gradient(rgba(255, 255, 255, .14) 1.5px, transparent 1.5px);
+      background-size: 22px 22px;
+      opacity: .5;
+      pointer-events: none;
+    }
+
+    .header-top {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+      margin-bottom: 22px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      color: #fff;
+    }
+
+    .brand-mark {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, .16);
+      border: 1px solid rgba(255, 255, 255, .28);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 16px;
+      flex-shrink: 0;
+    }
+
+    .brand-text h1 {
+      margin: 0;
+      font-size: 18px;
+      font-weight: 800;
+      letter-spacing: -.2px;
+    }
+
+    .brand-text p {
+      margin: 2px 0 0;
+      font-size: 12.5px;
+      color: rgba(255, 255, 255, .78);
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .admin-chip {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(255, 255, 255, .14);
+      border: 1px solid rgba(255, 255, 255, .26);
+      color: #fff;
+      padding: 6px 8px 6px 14px;
+      border-radius: var(--radius-pill);
+      font-size: 13px;
+    }
+
+    .admin-chip .dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #7CE7B4;
+      flex-shrink: 0;
+    }
+
+    .btn {
+      border: none;
+      border-radius: var(--radius-sm);
+      padding: 10px 16px;
+      font-size: 13.5px;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: transform .12s ease, box-shadow .12s ease, background .12s ease;
+      white-space: nowrap;
+    }
+
+    .btn:active {
+      transform: scale(.97);
+    }
+
+    .btn-primary {
+      background: var(--color-primary);
+      color: #fff;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .btn-primary:hover {
+      background: var(--color-primary-dark);
+    }
+
+    .btn-ghost-light {
+      background: rgba(255, 255, 255, .14);
+      color: #fff;
+      border: 1px solid rgba(255, 255, 255, .3);
+    }
+
+    .btn-ghost-light:hover {
+      background: rgba(255, 255, 255, .22);
+    }
+
+    .btn-outline {
+      background: #fff;
+      color: var(--color-text);
+      border: 1px solid var(--color-border);
+    }
+
+    .btn-outline:hover {
+      border-color: var(--color-primary);
+      color: var(--color-primary);
+    }
+
+    .btn-soft {
+      background: var(--color-surface-soft);
+      color: var(--color-primary-dark);
+    }
+
+    .btn-soft:hover {
+      background: var(--color-primary-soft);
+    }
+
+    .btn-danger-soft {
+      background: var(--color-danger-soft);
+      color: var(--color-danger);
+    }
+
+    .btn-danger-soft:hover {
+      background: #f8d6d6;
+    }
+
+    .btn-success {
+      background: var(--color-success);
+      color: #fff;
+    }
+
+    .btn-success:hover {
+      filter: brightness(.94);
+    }
+
+    .btn-icon {
+      width: 38px;
+      height: 38px;
+      padding: 0;
+      justify-content: center;
+      border-radius: var(--radius-sm);
+    }
+
+    .btn-sm {
+      padding: 7px 11px;
+      font-size: 12.5px;
+    }
+
+    .btn-block {
+      width: 100%;
+      justify-content: center;
+    }
+
+    .btn[disabled] {
+      opacity: .55;
+      pointer-events: none;
+    }
+
+    /* Search card */
+    .search-card {
+      position: relative;
+      background: var(--color-surface);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-lg);
+      padding: 16px;
+      display: grid;
+      grid-template-columns: 1fr auto auto;
+      gap: 10px;
+    }
+
+    .search-input-wrap {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .search-input-wrap svg {
+      position: absolute;
+      right: 14px;
+      width: 18px;
+      height: 18px;
+      color: var(--color-text-faint);
+      pointer-events: none;
+    }
+
+    #searchInput {
+      width: 100%;
+      padding: 12px 42px 12px 14px;
+      border: 1.5px solid var(--color-border);
+      border-radius: var(--radius-sm);
+      font-size: 14.5px;
+      color: var(--color-text);
+      background: var(--color-bg);
+      outline: none;
+      transition: border-color .12s ease, background .12s ease;
+    }
+
+    #searchInput:focus {
+      border-color: var(--color-primary);
+      background: #fff;
+    }
+
+    /* Custom smooth dropdown (replaces native <select> for a less "stiff" feel) */
+    .dropdown {
+      position: relative;
+      min-width: 150px;
+      z-index: 1;
+    }
+
+    .dropdown.open {
+      z-index: 80;
+    }
+
+    .dropdown-trigger {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      padding: 12px 14px;
+      border: 1.5px solid var(--color-border);
+      border-radius: var(--radius-sm);
+      background: var(--color-bg);
+      font-size: 13.5px;
+      color: var(--color-text);
+      outline: none;
+      cursor: pointer;
+      font-family: inherit;
+      appearance: none;
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      box-shadow: none;
+      transition: border-color .16s ease, background .16s ease, box-shadow .16s ease;
+    }
+
+    .dropdown-trigger:hover {
+      border-color: #C7D2E8;
+      background: #fff;
+    }
+
+    .dropdown-trigger:focus-visible {
+      border-color: var(--color-primary);
+      box-shadow: 0 0 0 3px var(--color-primary-soft);
+    }
+
+    .dropdown.open .dropdown-trigger {
+      border-color: var(--color-primary);
+      background: #fff;
+      box-shadow: 0 0 0 3px var(--color-primary-soft);
+    }
+
+    .dropdown-trigger .chev {
+      width: 15px;
+      height: 15px;
+      flex-shrink: 0;
+      color: var(--color-text-faint);
+      transition: transform .2s cubic-bezier(.4, 0, .2, 1);
+    }
+
+    .dropdown.open .dropdown-trigger .chev {
+      transform: rotate(180deg);
+      color: var(--color-primary);
+    }
+
+    .dropdown-trigger .val {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .dropdown-panel {
+      position: absolute;
+      top: calc(100% + 8px);
+      right: 0;
+      left: 0;
+      min-width: 190px;
+      background: #fff;
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-sm);
+      box-shadow: var(--shadow-md);
+      padding: 6px;
+      z-index: 200;
+      max-height: 280px;
+      overflow-y: auto;
+      opacity: 0;
+      transform: translateY(-6px) scale(.98);
+      transform-origin: top center;
+      pointer-events: none;
+      transition: opacity .16s cubic-bezier(.4, 0, .2, 1), transform .16s cubic-bezier(.4, 0, .2, 1);
+    }
+
+    .dropdown.open .dropdown-panel {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+      pointer-events: auto;
+    }
+
+    .dropdown-option {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      padding: 9px 11px;
+      border-radius: 8px;
+      font-size: 13.5px;
+      color: var(--color-text);
+      cursor: pointer;
+      transition: background .12s ease, color .12s ease;
+    }
+
+    .dropdown-option:hover {
+      background: var(--color-surface-soft);
+    }
+
+    .dropdown-option.selected {
+      background: var(--color-primary-soft);
+      color: var(--color-primary-dark);
+      font-weight: 700;
+    }
+
+    .dropdown-option .check {
+      width: 14px;
+      height: 14px;
+      flex-shrink: 0;
+      opacity: 0;
+      transition: opacity .12s ease;
+      color: var(--color-primary);
+    }
+
+    .dropdown-option.selected .check {
+      opacity: 1;
+    }
+
+    @media (max-width:720px) {
+      .search-card {
+        grid-template-columns: 1fr;
+      }
+
+      .dropdown {
+        min-width: 100%;
+        width: 100%;
+      }
+    }
+
+    /* ============================================================
+   Toolbar
+   ============================================================ */
+    .toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin: 22px 0 14px;
+    }
+
+    .result-count {
+      font-size: 13.5px;
+      color: var(--color-text-soft);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .result-count b {
+      color: var(--color-text);
+      font-weight: 800;
+    }
+
+    .toolbar-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    /* ============================================================
+   Results — Desktop Table
+   ============================================================ */
+    .table-wrap {
+      background: var(--color-surface);
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-sm);
+      border: 1px solid var(--color-border);
+      overflow: hidden;
+    }
+
+    table.people-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13.5px;
+    }
+
+    table.people-table thead th {
+      text-align: right;
+      padding: 14px 16px;
+      background: var(--color-surface-soft);
+      color: var(--color-text-soft);
+      font-weight: 700;
+      font-size: 12.5px;
+      border-bottom: 1px solid var(--color-border);
+    }
+
+    table.people-table thead th.sortable {
+      cursor: pointer;
+      user-select: none;
+      transition: color .12s ease;
+    }
+
+    table.people-table thead th.sortable:hover {
+      color: var(--color-primary);
+    }
+
+    table.people-table thead th.sortable .th-inner {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    table.people-table thead th.sortable .sort-ic {
+      width: 13px;
+      height: 13px;
+      opacity: .35;
+      transition: opacity .12s ease, transform .12s ease;
+      flex-shrink: 0;
+    }
+
+    table.people-table thead th.sortable.active {
+      color: var(--color-primary);
+    }
+
+    table.people-table thead th.sortable.active .sort-ic {
+      opacity: 1;
+    }
+
+    table.people-table thead th.sortable.active.desc .sort-ic {
+      transform: rotate(180deg);
+    }
+
+    table.people-table tbody tr {
+      border-bottom: 1px solid var(--color-border);
+      transition: background .1s ease;
+    }
+
+    table.people-table tbody tr:last-child {
+      border-bottom: none;
+    }
+
+    table.people-table tbody tr:hover {
+      background: #FAFBFE;
+    }
+
+    table.people-table td {
+      padding: 12px 16px;
+      vertical-align: middle;
+      color: var(--color-text);
+    }
+
+    .person-name-cell {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .person-name-cell .meta small {
+      display: block;
+      color: var(--color-text-faint);
+      font-weight: 400;
+      font-size: 11.5px;
+      margin-top: 1px;
+    }
+
+    .person-name-cell .meta b {
+      font-weight: 700;
+      font-size: 13.5px;
+    }
+
+    .avatar {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 13px;
+      color: #fff;
+      flex-shrink: 0;
+      background: var(--color-primary);
+      overflow: hidden;
+      border: 2px solid #fff;
+      box-shadow: 0 0 0 1px var(--color-border);
+    }
+
+    .avatar img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .avatar-lg {
+      width: 78px;
+      height: 78px;
+      font-size: 24px;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 4px 11px;
+      border-radius: var(--radius-pill);
+      font-size: 11.5px;
+      font-weight: 700;
+    }
+
+    .action-cell {
+      display: flex;
+      gap: 6px;
+      justify-content: flex-start;
+    }
+
+    /* ============================================================
+   Results — Mobile Cards
+   ============================================================ */
+    .cards-wrap {
+      display: grid;
+      gap: 12px;
+    }
+
+    .person-card {
+      background: var(--color-surface);
+      border-radius: var(--radius-md);
+      border: 1px solid var(--color-border);
+      box-shadow: var(--shadow-sm);
+      padding: 16px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .person-card::before {
+      content: "";
+      position: absolute;
+      inset-inline-start: 0;
+      top: 0;
+      bottom: 0;
+      width: 4px;
+      background: var(--dept-color, var(--color-primary));
+    }
+
+    .person-card-head {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .person-card-head .info b {
+      display: block;
+      font-size: 15px;
+      font-weight: 800;
+    }
+
+    .person-card-head .info span {
+      display: block;
+      font-size: 12.5px;
+      color: var(--color-text-soft);
+      margin-top: 2px;
+    }
+
+    .person-card-body {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-bottom: 14px;
+      font-size: 12.5px;
+      color: var(--color-text-soft);
+    }
+
+    .person-card-body .row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .person-card-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .person-card-actions .btn {
+      flex: 1;
+      min-width: 88px;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--color-text-soft);
+      background: var(--color-surface);
+      border-radius: var(--radius-md);
+      border: 1px dashed var(--color-border);
+    }
+
+    .empty-state svg {
+      width: 52px;
+      height: 52px;
+      color: var(--color-text-faint);
+      margin-bottom: 14px;
+    }
+
+    .empty-state h3 {
+      margin: 0 0 6px;
+      font-size: 15px;
+      color: var(--color-text);
+    }
+
+    .empty-state p {
+      margin: 0;
+      font-size: 13px;
+    }
+
+    .loading-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 60px 0;
+      color: var(--color-text-soft);
+      font-size: 13.5px;
+      gap: 10px;
+    }
+
+    .spinner {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      border: 2.5px solid var(--color-border);
+      border-top-color: var(--color-primary);
+      animation: spin .7s linear infinite;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    /* table/cards responsive switch */
+    .table-wrap {
+      display: block;
+    }
+
+    .cards-wrap {
+      display: none;
+    }
+
+    @media (max-width:860px) {
+      .table-wrap {
+        display: none;
+      }
+
+      .cards-wrap {
+        display: grid;
+      }
+    }
+
+    /* ============================================================
+   Modal (شامل Detail / Person Form / Login / Confirm)
+   ============================================================ */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(20, 26, 45, .5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      z-index: 200;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .15s ease;
+    }
+
+    .modal-overlay.open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .modal-box {
+      background: var(--color-surface);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-lg);
+      width: 100%;
+      max-width: 480px;
+      max-height: 90vh;
+      overflow-y: auto;
+      transform: translateY(14px) scale(.98);
+      transition: transform .15s ease;
+    }
+
+    .modal-overlay.open .modal-box {
+      transform: translateY(0) scale(1);
+    }
+
+    .modal-box.modal-wide {
+      max-width: 600px;
+    }
+
+    .modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 18px 20px;
+      border-bottom: 1px solid var(--color-border);
+      position: sticky;
+      top: 0;
+      background: var(--color-surface);
+      z-index: 2;
+    }
+
+    .modal-header h3 {
+      margin: 0;
+      font-size: 15.5px;
+      font-weight: 800;
+    }
+
+    .modal-close {
+      width: 32px;
+      height: 32px;
+      border: none;
+      background: var(--color-surface-soft);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--color-text-soft);
+      flex-shrink: 0;
+    }
+
+    .modal-close:hover {
+      background: var(--color-danger-soft);
+      color: var(--color-danger);
+    }
+
+    .modal-body {
+      padding: 20px;
+    }
+
+    .modal-footer {
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
+      padding: 16px 20px;
+      border-top: 1px solid var(--color-border);
+    }
+
+    /* Detail Modal specific */
+    .detail-hero {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      margin-bottom: 18px;
+    }
+
+    .detail-hero .avatar-lg {
+      margin-bottom: 12px;
+    }
+
+    .detail-hero h2 {
+      margin: 0;
+      font-size: 18px;
+      font-weight: 800;
+    }
+
+    .detail-hero p {
+      margin: 4px 0 0;
+      color: var(--color-text-soft);
+      font-size: 13.5px;
+    }
+
+    .detail-list {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      margin-bottom: 16px;
+    }
+
+    .detail-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 4px;
+      border-bottom: 1px solid var(--color-border);
+    }
+
+    .detail-row:last-child {
+      border-bottom: none;
+    }
+
+    .detail-row .ic {
+      width: 34px;
+      height: 34px;
+      border-radius: 10px;
+      background: var(--color-surface-soft);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--color-primary);
+      flex-shrink: 0;
+    }
+
+    .detail-row .txt {
+      min-width: 0;
+    }
+
+    .detail-row .txt small {
+      display: block;
+      color: var(--color-text-faint);
+      font-size: 11.5px;
+      margin-bottom: 1px;
+    }
+
+    .detail-row .txt span {
+      display: block;
+      font-size: 13.5px;
+      font-weight: 600;
+      word-break: break-word;
+    }
+
+    .detail-actions {
+      display: flex;
+      gap: 10px;
+    }
+
+    .detail-actions .btn {
+      flex: 1;
+      justify-content: center;
+    }
+
+    /* Form */
+    .form-group {
+      margin-bottom: 14px;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 12.5px;
+      font-weight: 700;
+      color: var(--color-text-soft);
+      margin-bottom: 6px;
+    }
+
+    .form-group input[type=text],
+    .form-group input[type=tel],
+    .form-group input[type=email] {
+      width: 100%;
+      padding: 11px 13px;
+      border: 1.5px solid var(--color-border);
+      border-radius: var(--radius-sm);
+      font-size: 13.5px;
+      outline: none;
+      transition: border-color .12s ease;
+      background: var(--color-bg);
+    }
+
+    .form-group input:focus {
+      border-color: var(--color-primary);
+      background: #fff;
+    }
+
+    .form-row2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    @media (max-width:480px) {
+      .form-row2 {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .field-hint {
+      font-size: 11.5px;
+      color: var(--color-text-faint);
+      margin-top: 5px;
+    }
+
+    .field-error {
+      font-size: 11.5px;
+      color: var(--color-danger);
+      margin-top: 5px;
+      display: none;
+    }
+
+    .form-group.error input {
+      border-color: var(--color-danger);
+    }
+
+    .form-group.error .field-error {
+      display: block;
+    }
+
+    .photo-picker {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 12px;
+      border: 1.5px dashed var(--color-border);
+      border-radius: var(--radius-sm);
+    }
+
+    .photo-picker .preview {
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      overflow: hidden;
+      flex-shrink: 0;
+      background: var(--color-surface-soft);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--color-text-faint);
+    }
+
+    .photo-picker .preview img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .photo-picker .actions {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      flex: 1;
+    }
+
+    .photo-picker input[type=file] {
+      display: none;
+    }
+
+    /* Login */
+    .login-icon {
+      width: 52px;
+      height: 52px;
+      border-radius: 16px;
+      background: var(--color-primary-soft);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--color-primary);
+      margin: 0 auto 14px;
+    }
+
+    /* Confirm modal */
+    .confirm-icon {
+      width: 52px;
+      height: 52px;
+      border-radius: 16px;
+      background: var(--color-danger-soft);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--color-danger);
+      margin: 0 auto 12px;
+    }
+
+    .confirm-body {
+      text-align: center;
+    }
+
+    .confirm-body h3 {
+      margin: 0 0 6px;
+      font-size: 15.5px;
+    }
+
+    .confirm-body p {
+      margin: 0;
+      font-size: 13px;
+      color: var(--color-text-soft);
+    }
+
+    /* ============================================================
+   Toast
+   ============================================================ */
+    #toastWrap {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 400;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      align-items: center;
+      width: 100%;
+      padding: 0 16px;
+    }
+
+    .toast {
+      background: var(--color-text);
+      color: #fff;
+      padding: 11px 18px;
+      border-radius: var(--radius-pill);
+      font-size: 13px;
+      box-shadow: var(--shadow-md);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      animation: toastIn .18s ease;
+      max-width: 100%;
+    }
+
+    .toast.success {
+      background: var(--color-success);
+    }
+
+    .toast.error {
+      background: var(--color-danger);
+    }
+
+    @keyframes toastIn {
+      from {
+        opacity: 0;
+        transform: translateY(8px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* ============================================================
+   Footer
+   ============================================================ */
+    .site-footer {
+      margin-top: 52px;
+      background: var(--color-wine-950);
+      border-top: none;
+    }
+
+    .footer-inner {
+      padding: 34px 0 22px;
+      display: grid;
+      grid-template-columns: 1.3fr 1fr;
+      gap: 24px;
+    }
+
+    @media (max-width:720px) {
+      .footer-inner {
+        grid-template-columns: 1fr;
+        gap: 26px;
+        text-align: center;
+      }
+    }
+
+    .footer-brand h4 {
+      margin: 0 0 8px;
+      font-size: 15px;
+      font-weight: 800;
+      color: #FFFFFF;
+    }
+
+    .footer-brand p {
+      margin: 0;
+      font-size: 13px;
+      color: #D9C6CE;
+      max-width: 360px;
+      line-height: 1.8;
+    }
+
+    @media (max-width:720px) {
+      .footer-brand p {
+        margin: 0 auto;
+      }
+    }
+
+    .footer-links h5 {
+      margin: 0 0 12px;
+      font-size: 12.5px;
+      color: #C9AAB4;
+      font-weight: 700;
+    }
+
+    .footer-link-list {
+      display: flex;
+      flex-direction: column;
+      gap: 9px;
+    }
+
+    @media (max-width:720px) {
+      .footer-link-list {
+        align-items: center;
+      }
+    }
+
+    .footer-link-list a {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: #D9C6CE;
+      text-decoration: none;
+      font-size: 13px;
+      transition: color .12s ease;
+    }
+
+    .footer-link-list a:hover {
+      color: #FF89A8;
+    }
+
+    .footer-bottom {
+      border-top: 1px solid rgba(255, 255, 255, .12);
+      padding: 16px 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    @media (max-width:720px) {
+      .footer-bottom {
+        justify-content: center;
+        text-align: center;
+      }
+    }
+
+    .footer-bottom p {
+      margin: 0;
+      font-size: 12px;
+      color: #C9AAB4;
+    }
+
+    .footer-bottom .builder {
+      font-weight: 700;
+      color: #FFFFFF;
+    }
+
+    main {
+      min-height: 50vh;
+    }
+
+    main .container {
+      padding-top: 0;
+      padding-bottom: 20px;
+    }
+  </style>
 </head>
+
 <body>
-<div class="container">
-<div class="card header-card"><div class="top">
-<div><h1>سامانه اطلاعات اساتید و کارکنان دانشگاه</h1><div id="modeText" class="muted">در حال آماده‌سازی...</div></div>
-<div id="authArea"></div></div></div>
-<div id="message"></div>
-<div class="card search-card"><div class="search-grid">
-<select id="searchType"><option value="all">جستجوی عمومی</option><option value="first_name">نام</option><option value="last_name">نام خانوادگی</option><option value="position">سمت</option></select>
-<input id="searchText" placeholder="مثلاً: مدیر گروه کامپیوتر یا فلاحی">
-<select id="department"><option value="">همه دانشکده‌ها</option></select>
-<button class="btn primary" id="searchBtn">جستجو</button><button class="btn gray" id="clearBtn">پاک کردن</button>
-</div></div>
-<div class="card"><div class="top results-header"><div class="results-meta"><h2>نتایج</h2><span id="count" class="count-badge"></span></div></div>
-<div class="desktop-table"><div class="table-wrap"><table><thead><tr><th>نام</th><th>سمت</th><th>دانشکده / گروه</th><th>تلفن</th><th>عملیات</th></tr></thead><tbody id="rows"></tbody></table></div></div>
-<div id="mobileResults" class="mobile-results"></div></div></div>
 
-<dialog id="loginDialog"><div class="dialog-card"><h2>ورود مدیر</h2>
-<p class="muted">دکمه اشتباه زدی شما مدیر نیستی</p>
-<form id="loginForm">
-<input id="loginEmail" type="email" placeholder="ایمیل مدیر" required style="margin-bottom:10px">
-<input id="loginPassword" type="password" placeholder="رمز عبور" required style="margin-bottom:10px">
-<button class="btn primary" style="width:100%;margin-bottom:8px">ورود</button>
-<button type="button" class="btn gray" style="width:100%" onclick="loginDialog.close()">انصراف</button>
-</form></div></dialog>
-
-<dialog id="detailDialog" class="detail-dialog">
-  <div id="detailContent"></div>
-</dialog>
-
-<dialog id="personDialog" class="detail-dialog"><div class="dialog-card"><h2 id="personTitle">افزودن شخص</h2>
-<form id="personForm"><div class="form-grid">
-<input id="firstName" placeholder="نام" required><input id="lastName" placeholder="نام خانوادگی" required>
-<input id="position" placeholder="سمت" required><input id="phone" placeholder="شماره تلفن">
-<input id="emailField" type="email" placeholder="ایمیل"><input id="departmentField" placeholder="دانشکده / گروه">
-<input id="office" placeholder="اتاق / محل کار">
-<input id="photoFile" class="photo-field" type="file" accept="image/png,image/jpeg,image/webp">
-<div class="photo-preview photo-field">
-  <div id="photoPreviewBox" class="photo-empty">بدون تصویر</div>
-  <div class="muted" style="font-size:12px">تصویر استاد را انتخاب کنید (PNG / JPG / WEBP)</div>
-</div>
-</div><div style="margin-top:12px;display:flex;gap:8px">
-<button class="btn primary" type="submit">ذخیره</button><button class="btn gray" type="button" onclick="personDialog.close()">انصراف</button>
-</div></form></div></dialog>
-
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script>
-const SUPABASE_URL="https://zkvvyocmwuuyctmeizby.supabase.co";
-const SUPABASE_ANON_KEY="sb_publishable_Syj62cfIl4534Wffxj69rA_3SoTeHxB";
-const ONLINE_MODE=!SUPABASE_URL.includes("PASTE_")&&!SUPABASE_ANON_KEY.includes("PASTE_");
-const DEMO_ADMIN_EMAIL="admin@university.local", DEMO_ADMIN_PASSWORD="1234";
-const DEFAULT_DATA=[{"id": "1", "first_name": "محسن", "last_name": "فلاحی", "position": "مدیر گروه کامپیوتر", "phone": "09123456789", "email": "m.fallahi@university.ac.ir", "department": "مهندسی کامپیوتر", "office": "ساختمان آموزش، اتاق 205"}, {"id": "2", "first_name": "علی", "last_name": "احمدی", "position": "استاد مهندسی کامپیوتر", "phone": "09120000001", "email": "a.ahmadi@university.ac.ir", "department": "مهندسی کامپیوتر", "office": "اتاق 204"}, {"id": "3", "first_name": "سارا", "last_name": "محمدی", "position": "معاون آموزشی", "phone": "09120000002", "email": "s.mohammadi@university.ac.ir", "department": "معاونت آموزشی", "office": "ساختمان مرکزی"}];
-let localPeople=JSON.parse(localStorage.getItem("university_people")||"null")||DEFAULT_DATA;
-if(!localStorage.getItem("university_people"))localStorage.setItem("university_people",JSON.stringify(localPeople));
-const sb=ONLINE_MODE?supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY):null;
-let isAdmin=false,editingId=null;
-const $=id=>document.getElementById(id);
-
-function normalize(s){return String(s??"").replaceAll("ي","ی").replaceAll("ى","ی").replaceAll("ك","ک").replaceAll("ۀ","ه").replaceAll("ة","ه").replaceAll("ؤ","و").replaceAll("إ","ا").replaceAll("أ","ا").replaceAll("ٱ","ا").replaceAll("ئ","ی").replaceAll("\u200c"," ").replaceAll("ـ","").replace(/\s+/g," ").trim().toLowerCase()}
-function escapeHtml(s){return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]))}
-function showMessage(t,type="success"){$("message").innerHTML=`<div class="message ${type}">${escapeHtml(t)}</div>`;setTimeout(()=>$("message").innerHTML="",3500)}
-
-function renderAuth(){
-if(isAdmin){
-$("authArea").innerHTML='<span class="badge">مدیر سامانه</span> <button class="btn primary" id="addBtn">افزودن شخص</button> <button class="btn gray" id="logoutBtn">خروج</button>';
-$("addBtn").onclick=()=>openPerson();$("logoutBtn").onclick=logout;
-}else{$("authArea").innerHTML='<button class="btn gray" id="loginBtn">ورود مدیر</button>';$("loginBtn").onclick=()=>$("loginDialog").showModal()}
-}
-
-async function refreshAuth(){
-if(!ONLINE_MODE){isAdmin=localStorage.getItem("demo_admin")==="1";renderAuth();return}
-const {data:{session}}=await sb.auth.getSession();isAdmin=!!session;renderAuth();
-}
-async function logout(){if(ONLINE_MODE)await sb.auth.signOut();localStorage.removeItem("demo_admin");isAdmin=false;renderAuth();await loadPeople()}
-
-function populateDepartments(rows){const values=[...new Set(rows.map(x=>x.department).filter(Boolean))].sort();$("department").innerHTML='<option value="">همه دانشکده‌ها</option>'+values.map(x=>`<option value="${escapeHtml(x)}">${escapeHtml(x)}</option>`).join("")}
-
-function localSearch(){
-const q=normalize($("searchText").value),type=$("searchType").value,dept=normalize($("department").value);
-let rows=localPeople.filter(p=>{if(dept&&normalize(p.department)!==dept)return false;if(!q)return true;const f=type==="first_name"?[p.first_name]:type==="last_name"?[p.last_name]:type==="position"?[p.position]:[p.first_name,p.last_name,p.position,p.phone,p.email,p.department,p.office];return f.some(v=>normalize(v).includes(q))});
-rows.sort((a,b)=>normalize(a.last_name).localeCompare(normalize(b.last_name),"fa"));renderRows(rows)
-}
-async function loadPeople(){
-if(!ONLINE_MODE){populateDepartments(localPeople);localSearch();return}
-const q=normalize($("searchText").value),type=$("searchType").value,dept=$("department").value;
-let query=sb.from("people").select("*").order("last_name").order("first_name");if(dept)query=query.eq("department",dept);
-const {data,error}=await query;if(error){showMessage("خطا در دریافت اطلاعات: "+error.message,"error");return}
-let rows=data||[];if(q)rows=rows.filter(p=>{const f=type==="first_name"?[p.first_name]:type==="last_name"?[p.last_name]:type==="position"?[p.position]:[p.first_name,p.last_name,p.position,p.phone,p.email,p.department,p.office];return f.some(v=>normalize(v).includes(q))});
-populateDepartments(data||[]);renderRows(rows)
-}
-let peopleById = {};
-
-function getInitials(p){
-  const a = (p.first_name || "").trim().charAt(0);
-  const b = (p.last_name || "").trim().charAt(0);
-  return (a + b) || "؟";
-}
-
-function renderRows(rows){
-  peopleById = {};
-  rows.forEach(p => { peopleById[String(p.id)] = p; });
-
-  $("count").textContent = `${rows.length} مورد`;
-
-  if(!rows.length){
-    $("rows").innerHTML = '<tr><td colspan="5"><div class="empty-state"><div class="empty-icon">🔎</div><div>موردی پیدا نشد.</div><div class="muted">عبارت جستجو یا فیلتر دانشکده را تغییر دهید.</div></div></td></tr>';
-    $("mobileResults").innerHTML = '<div class="empty-state"><div class="empty-icon">🔎</div><div>موردی پیدا نشد.</div><div class="muted">عبارت جستجو یا فیلتر دانشکده را تغییر دهید.</div></div>';
-    return;
-  }
-
-  $("rows").innerHTML = rows.map(p => `
-    <tr>
-      <td><strong>${escapeHtml(p.first_name + " " + p.last_name)}</strong></td>
-      <td>${escapeHtml(p.position)}</td>
-      <td>${escapeHtml(p.department || "")}</td>
-      <td>${p.phone ? `<a href="tel:${escapeHtml(p.phone)}" style="color:#1769aa;text-decoration:none">${escapeHtml(p.phone)}</a>` : "—"}</td>
-      <td>
-        <button class="btn gray" onclick="showPersonById('${String(p.id)}')">مشاهده</button>
-        ${isAdmin ? `<button class="btn gray" onclick="openPersonById('${String(p.id)}')">ویرایش</button> <button class="btn danger" onclick="deletePerson('${String(p.id)}')">حذف</button>` : ""}
-      </td>
-    </tr>`).join("");
-
-  $("mobileResults").innerHTML = rows.map(p => `
-    <div class="person-card-mobile">
-      <div class="person-row">
-        ${p.photo ? `<div class="profile-avatar has-photo"><img src="${escapeHtml(p.photo)}" alt=""></div>` : `<div class="profile-avatar">${escapeHtml(getInitials(p))}</div>`}
-        <div class="person-main">
-          <div class="person-name">${escapeHtml(p.first_name + " " + p.last_name)}</div>
-          <div class="person-position">${escapeHtml(p.position)}</div>
-          <div class="person-dept">${escapeHtml(p.department || "دانشکده ثبت نشده")}</div>
+  <!-- ============================================================
+     Header
+     ============================================================ -->
+  <header class="site-header">
+    <div class="container">
+      <div class="header-top">
+        <div class="brand">
+          <div class="brand-mark">UD</div>
+          <div class="brand-text">
+            <h1>سامانه اطلاعات اساتید و کارکنان</h1>
+            <p>جستجوی سریع اطلاعات تماس اعضای دانشگاه</p>
+          </div>
+        </div>
+        <div class="header-actions" id="headerActions">
+          <button class="btn btn-ghost-light" id="loginBtn" type="button">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4" />
+              <polyline points="10 17 15 12 10 7" />
+              <line x1="15" y1="12" x2="3" y2="12" />
+            </svg>
+            ورود مدیر
+          </button>
         </div>
       </div>
-      <div class="person-actions">
-        <button class="btn primary" onclick="showPersonById('${String(p.id)}')">مشاهده اطلاعات</button>
-        ${p.phone ? `<a class="btn gray" href="tel:${escapeHtml(p.phone)}">تماس</a>` : ""}
-        ${p.email ? `<a class="btn gray" href="mailto:${escapeHtml(p.email)}">ایمیل</a>` : ""}
-        ${isAdmin ? `<button class="btn gray" onclick="openPersonById('${String(p.id)}')">ویرایش</button><button class="btn danger" onclick="deletePerson('${String(p.id)}')">حذف</button>` : ""}
-      </div>
-    </div>`).join("");
-}
 
-
-function readLocalImage(file){
-  return new Promise((resolve,reject)=>{
-    const reader=new FileReader();
-    reader.onload=()=>resolve(reader.result);
-    reader.onerror=()=>reject(new Error("خواندن تصویر انجام نشد."));
-    reader.readAsDataURL(file);
-  });
-}
-
-function showPersonById(id){
-  const p = peopleById[String(id)];
-  if(!p) return;
-
-  const fullName = `${p.first_name || ""} ${p.last_name || ""}`.trim();
-  const detail = $("detailContent");
-  detail.innerHTML = `
-    <div class="detail-wrap">
-      <div class="detail-head">
-        <button class="close-x" onclick="$('detailDialog').close()">×</button>
-        <div class="detail-head-row">
-          ${p.photo ? `<div class="detail-avatar has-photo"><img src="${escapeHtml(p.photo)}" alt=""></div>` : `<div class="detail-avatar">${escapeHtml(getInitials(p))}</div>`}
-          <div>
-            <h2 class="detail-name">${escapeHtml(fullName)}</h2>
-            <p class="detail-position">${escapeHtml(p.position || "سمت ثبت نشده")}</p>
+      <div class="search-card">
+        <div class="search-input-wrap">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="7" />
+            <line x1="21" y1="21" x2="16.65" y2="16.65" />
+          </svg>
+          <input type="text" id="searchInput" placeholder="جستجوی نام، سمت، دانشکده، شماره تماس..."
+            autocomplete="off" />
+        </div>
+        <div class="dropdown" id="searchTypeDropdown">
+          <button type="button" class="dropdown-trigger">
+            <span class="val">جستجوی عمومی</span>
+            <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4">
+              <path d="M6 9l6 6 6-6" />
+            </svg>
+          </button>
+          <div class="dropdown-panel">
+            <div class="dropdown-option selected" data-value="general">
+              <span>جستجوی عمومی</span>
+              <svg class="check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                <polyline points="20 6 9 17 4 12" />
+              </svg>
+            </div>
+            <div class="dropdown-option" data-value="first_name">
+              <span>نام</span>
+              <svg class="check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                <polyline points="20 6 9 17 4 12" />
+              </svg>
+            </div>
+            <div class="dropdown-option" data-value="last_name">
+              <span>نام خانوادگی</span>
+              <svg class="check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                <polyline points="20 6 9 17 4 12" />
+              </svg>
+            </div>
+            <div class="dropdown-option" data-value="position">
+              <span>سمت</span>
+              <svg class="check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                <polyline points="20 6 9 17 4 12" />
+              </svg>
+            </div>
+          </div>
+        </div>
+        <div class="dropdown" id="departmentDropdown">
+          <button type="button" class="dropdown-trigger">
+            <span class="val">همه دانشکده‌ها / گروه‌ها</span>
+            <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4">
+              <path d="M6 9l6 6 6-6" />
+            </svg>
+          </button>
+          <div class="dropdown-panel">
+            <div class="dropdown-option selected" data-value="">
+              <span>همه دانشکده‌ها / گروه‌ها</span>
+              <svg class="check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                <polyline points="20 6 9 17 4 12" />
+              </svg>
+            </div>
           </div>
         </div>
       </div>
-      <div class="detail-body">
-        <div class="info-grid">
-          <div class="info-item"><div class="info-label">سمت</div><div class="info-value">${escapeHtml(p.position || "ثبت نشده")}</div></div>
-          <div class="info-item"><div class="info-label">دانشکده / گروه</div><div class="info-value">${escapeHtml(p.department || "ثبت نشده")}</div></div>
-          <div class="info-item"><div class="info-label">شماره تلفن</div><div class="info-value">${p.phone ? `<a href="tel:${escapeHtml(p.phone)}">${escapeHtml(p.phone)}</a>` : "ثبت نشده"}</div></div>
-          <div class="info-item"><div class="info-label">ایمیل</div><div class="info-value">${p.email ? `<a href="mailto:${escapeHtml(p.email)}">${escapeHtml(p.email)}</a>` : "ثبت نشده"}</div></div>
-          <div class="info-item" style="grid-column:1/-1"><div class="info-label">اتاق / محل کار</div><div class="info-value">${escapeHtml(p.office || "ثبت نشده")}</div></div>
-        </div>
-        <div class="detail-actions">
-          ${p.phone ? `<a class="btn primary" href="tel:${escapeHtml(p.phone)}">📞 تماس</a>` : ""}
-          ${p.email ? `<a class="btn gray" href="mailto:${escapeHtml(p.email)}">✉️ ارسال ایمیل</a>` : ""}
-          <button class="btn gray" onclick="$('detailDialog').close()">بستن</button>
+    </div>
+  </header>
+
+  <!-- ============================================================
+     Main
+     ============================================================ -->
+  <main>
+    <div class="container">
+      <div class="toolbar">
+        <div class="result-count" id="resultCount">در حال بارگذاری...</div>
+        <div class="toolbar-actions" id="adminToolbar" style="display:none;">
+          <button class="btn btn-primary" id="addPersonBtn" type="button">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4">
+              <line x1="12" y1="5" x2="12" y2="19" />
+              <line x1="5" y1="12" x2="19" y2="12" />
+            </svg>
+            افزودن شخص جدید
+          </button>
+          <button class="btn btn-outline" id="logoutBtn" type="button">خروج از حساب مدیر</button>
         </div>
       </div>
-    </div>`;
-  $("detailDialog").showModal();
-}
 
-function openPersonById(id){
-  const p = peopleById[String(id)];
-  if(p) openPerson(p);
-}
+      <div id="loadingIndicator" class="loading-row">
+        <span class="spinner"></span>
+        <span>در حال دریافت اطلاعات...</span>
+      </div>
 
-function openPerson(p=null){
-  editingId=p?.id||null;
-  $("personTitle").textContent=p?"ویرایش شخص":"افزودن شخص";
-  $("firstName").value=p?.first_name||"";
-  $("lastName").value=p?.last_name||"";
-  $("position").value=p?.position||"";
-  $("phone").value=p?.phone||"";
-  $("emailField").value=p?.email||"";
-  $("departmentField").value=p?.department||"";
-  $("office").value=p?.office||"";
-  $("photoFile").value="";
-  const box=$("photoPreviewBox");
-  if(p?.photo){
-    box.className=""; box.innerHTML=`<img src="${escapeHtml(p.photo)}" alt="">`;
-  }else{
-    box.className="photo-empty"; box.textContent="بدون تصویر";
-  }
-  $("personDialog").showModal();
-}
+      <div class="table-wrap hidden" id="tableWrap">
+        <table class="people-table">
+          <thead>
+            <tr>
+              <th class="sortable" data-sort="name"><span class="th-inner">نام <svg class="sort-ic" viewBox="0 0 24 24"
+                    fill="none" stroke="currentColor" stroke-width="2.4">
+                    <path d="M12 19V5" />
+                    <path d="M6 11l6-6 6 6" />
+                  </svg></span></th>
+              <th class="sortable" data-sort="position"><span class="th-inner">سمت <svg class="sort-ic"
+                    viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4">
+                    <path d="M12 19V5" />
+                    <path d="M6 11l6-6 6 6" />
+                  </svg></span></th>
+              <th class="sortable" data-sort="department"><span class="th-inner">دانشکده / گروه <svg class="sort-ic"
+                    viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4">
+                    <path d="M12 19V5" />
+                    <path d="M6 11l6-6 6 6" />
+                  </svg></span></th>
+              <th>تلفن</th>
+              <th>عملیات</th>
+            </tr>
+          </thead>
+          <tbody id="tableBody"></tbody>
+        </table>
+      </div>
 
+      <div class="cards-wrap hidden" id="cardsWrap"></div>
 
-async function uploadTeacherPhoto(file){
-  if(!file) return null;
-  if(!ONLINE_MODE) return null;
+      <div class="empty-state hidden" id="emptyState">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+          <circle cx="11" cy="11" r="7" />
+          <line x1="21" y1="21" x2="16.65" y2="16.65" />
+        </svg>
+        <h3>نتیجه‌ای یافت نشد</h3>
+        <p>عبارت جستجو یا فیلتر انتخابی را تغییر دهید.</p>
+      </div>
+    </div>
+  </main>
 
-  const allowed = ["image/png","image/jpeg","image/webp"];
-  if(!allowed.includes(file.type)) throw new Error("فرمت تصویر مجاز نیست.");
-  if(file.size > 3 * 1024 * 1024) throw new Error("حجم تصویر باید کمتر از 3 مگابایت باشد.");
+  <!-- ============================================================
+     Footer
+     ============================================================ -->
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-inner">
+        <div class="footer-brand">
+          <h4>سامانه اطلاعات دانشگاه</h4>
+          <!-- <p>مرجع آنلاین اطلاعات تماس اساتید و کارکنان دانشگاه؛ جستجوی سریع، دقیق و در دسترس روی موبایل و دسکتاپ.</p> -->
+          <p>یه شب دنبال مشخصات یه نفر بودم. پیدا کردنش سخت بود.
+به‌جای اینکه بی‌خیالش بشم، تصمیم گرفتم یه سایت برای حل این مشکل بسازم.
+انتخاب منطقی‌ای نبود، ولی خب، الان اینجاییم.</p>
+        </div>
+        <div class="footer-links">
+          <h5>راه‌های ارتباطی</h5>
+          <div class="footer-link-list">
+            <a href="https://t.me/iauMarvdasht" target="_blank" rel="noopener"><i class="bi bi-telegram "></i> تلگرام</a>
+            <a href="https://t.me/MaktabAcademy" target="_blank" rel="noopener"><i class="bi bi-chat-left-text-fill"></i> گروه درسی</a>
+            <!-- <a href="https://instagram.com/YOUR_PAGE" target="_blank" rel="noopener">📸 اینستاگرام</a> -->
+            <!-- <a href="mailto:YOUR_EMAIL@example.com">✉️ ایمیل</a> -->
+          </div>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>© سامانه اطلاعات دانشگاه — تمامی حقوق محفوظ است.</p>
+        <p>طراحی و توسعه توسط <span class="builder">Mohsen Kie</span></p>
+      </div>
+    </div>
+  </footer>
 
-  const ext = file.name.split(".").pop().toLowerCase() || "jpg";
-  const safeId = editingId || crypto.randomUUID();
-  const path = `teachers/${safeId}-${Date.now()}.${ext}`;
+  <!-- ============================================================
+     Modal: Detail
+     ============================================================ -->
+  <div class="modal-overlay" id="detailModalOverlay">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3>مشاهده اطلاعات</h3>
+        <button class="modal-close" data-close="detailModalOverlay" aria-label="بستن" type="button">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4">
+            <line x1="18" y1="6" x2="6" y2="18" />
+            <line x1="6" y1="6" x2="18" y2="18" />
+          </svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="detail-hero">
+          <div class="avatar avatar-lg" id="detailAvatar"></div>
+          <h2 id="detailName"></h2>
+          <p id="detailPosition"></p>
+        </div>
+        <div class="detail-list">
+          <div class="detail-row" id="detailDeptRow">
+            <div class="ic"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                stroke-width="2">
+                <path d="M3 21h18" />
+                <path d="M5 21V7l7-4 7 4v14" />
+                <path d="M9 9h1" />
+                <path d="M9 13h1" />
+                <path d="M14 9h1" />
+                <path d="M14 13h1" />
+              </svg></div>
+            <div class="txt"><small>دانشکده / گروه</small><span id="detailDept"></span></div>
+          </div>
+          <div class="detail-row" id="detailOfficeRow">
+            <div class="ic"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                stroke-width="2">
+                <rect x="3" y="7" width="18" height="14" rx="2" />
+                <path d="M3 7l9-4 9 4" />
+              </svg></div>
+            <div class="txt"><small>اتاق / محل کار</small><span id="detailOffice"></span></div>
+          </div>
+          <div class="detail-row" id="detailPhoneRow">
+            <div class="ic"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                stroke-width="2">
+                <path
+                  d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z" />
+              </svg></div>
+            <div class="txt"><small>شماره تلفن</small><span id="detailPhone"></span></div>
+          </div>
+          <div class="detail-row" id="detailEmailRow">
+            <div class="ic"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                stroke-width="2">
+                <path d="M4 4h16v16H4z" fill="none" stroke="none" />
+                <path d="M22 6c0-1.1-.9-2-2-2H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V6z" />
+                <polyline points="22 6 12 13 2 6" />
+              </svg></div>
+            <div class="txt"><small>ایمیل</small><span id="detailEmail"></span></div>
+          </div>
+        </div>
+        <div class="detail-actions">
+          <a class="btn btn-success" id="detailCallBtn" href="#"><svg width="14" height="14" viewBox="0 0 24 24"
+              fill="none" stroke="currentColor" stroke-width="2">
+              <path
+                d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z" />
+            </svg> تماس</a>
+          <a class="btn btn-soft" id="detailEmailBtn" href="#"><svg width="14" height="14" viewBox="0 0 24 24"
+              fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M22 6c0-1.1-.9-2-2-2H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V6z" />
+              <polyline points="22 6 12 13 2 6" />
+            </svg> ارسال ایمیل</a>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-outline" data-close="detailModalOverlay" type="button">بستن</button>
+      </div>
+    </div>
+  </div>
 
-  const {error: uploadError} = await sb.storage.from("teacher-photos").upload(path, file, {
-    cacheControl: "3600",
-    upsert: true,
-    contentType: file.type
-  });
-  if(uploadError) throw uploadError;
+  <!-- ============================================================
+     Modal: Add / Edit Person (Admin only)
+     ============================================================ -->
+  <div class="modal-overlay" id="personModalOverlay">
+    <div class="modal-box modal-wide">
+      <div class="modal-header">
+        <h3 id="personModalTitle">افزودن شخص جدید</h3>
+        <button class="modal-close" data-close="personModalOverlay" aria-label="بستن" type="button">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4">
+            <line x1="18" y1="6" x2="6" y2="18" />
+            <line x1="6" y1="6" x2="18" y2="18" />
+          </svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <form id="personForm">
+          <div class="form-group">
+            <label>عکس پروفایل</label>
+            <div class="photo-picker">
+              <div class="preview" id="photoPreview">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+                  <circle cx="12" cy="8" r="4" />
+                  <path d="M4 21c0-4 4-6 8-6s8 2 8 6" />
+                </svg>
+              </div>
+              <div class="actions">
+                <label class="btn btn-outline btn-sm" for="photoInput" style="cursor:pointer;">انتخاب تصویر</label>
+                <input type="file" id="photoInput" accept=".png,.jpg,.jpeg,.webp,image/png,image/jpeg,image/webp" />
+                <button type="button" class="btn btn-danger-soft btn-sm hidden" id="removePhotoBtn">حذف عکس</button>
+                <span class="field-hint">فرمت PNG، JPG یا WEBP — حداکثر ۳ مگابایت</span>
+              </div>
+            </div>
+          </div>
 
-  const {data} = sb.storage.from("teacher-photos").getPublicUrl(path);
-  return data.publicUrl;
-}
+          <div class="form-row2">
+            <div class="form-group" id="fgFirstName">
+              <label>نام *</label>
+              <input type="text" id="firstNameInput" required />
+              <span class="field-error">وارد کردن نام الزامی است</span>
+            </div>
+            <div class="form-group" id="fgLastName">
+              <label>نام خانوادگی *</label>
+              <input type="text" id="lastNameInput" required />
+              <span class="field-error">وارد کردن نام خانوادگی الزامی است</span>
+            </div>
+          </div>
 
-async function savePerson(e){
-  e.preventDefault();
+          <div class="form-group" id="fgPosition">
+            <label>سمت *</label>
+            <input type="text" id="positionInput" placeholder="مثلاً: مدیر گروه کامپیوتر" />
+            <span class="field-error">وارد کردن سمت الزامی است</span>
+          </div>
 
-  const payload={
-    first_name:$("firstName").value.trim(),
-    last_name:$("lastName").value.trim(),
-    position:$("position").value.trim(),
-    phone:$("phone").value.trim(),
-    email:$("emailField").value.trim(),
-    department:$("departmentField").value.trim(),
-    office:$("office").value.trim()
-  };
+          <div class="form-row2">
+            <div class="form-group">
+              <label>دانشکده / گروه</label>
+              <input type="text" id="departmentInput" placeholder="مثلاً: مهندسی کامپیوتر" />
+            </div>
+            <div class="form-group">
+              <label>اتاق / محل کار</label>
+              <input type="text" id="officeInput" placeholder="مثلاً: طبقه دوم، اتاق ۲۰۴" />
+            </div>
+          </div>
 
-  if(!payload.first_name||!payload.last_name||!payload.position){
-    showMessage("نام، نام خانوادگی و سمت الزامی هستند.","error");
-    return;
-  }
+          <div class="form-row2">
+            <div class="form-group" id="fgPhone">
+              <label>شماره تلفن</label>
+              <input type="tel" id="phoneInput" placeholder="مثلاً: 09121234567" />
+            </div>
+            <div class="form-group" id="fgEmail">
+              <label>ایمیل</label>
+              <input type="email" id="emailInput" placeholder="name@iau.ac.ir" />
+              <span class="field-error" id="emailError">ایمیل واردشده معتبر نیست</span>
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-outline" data-close="personModalOverlay" type="button">انصراف</button>
+        <button class="btn btn-primary" id="savePersonBtn" type="button">ذخیره اطلاعات</button>
+      </div>
+    </div>
+  </div>
 
-  try{
-    const file=$("photoFile").files[0] || null;
+  <!-- ============================================================
+     Modal: Admin Login
+     ============================================================ -->
+  <div class="modal-overlay" id="loginModalOverlay">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3>ورود مدیر</h3>
+        <button class="modal-close" data-close="loginModalOverlay" aria-label="بستن" type="button">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4">
+            <line x1="18" y1="6" x2="6" y2="18" />
+            <line x1="6" y1="6" x2="18" y2="18" />
+          </svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="login-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <rect x="3" y="11" width="18" height="10" rx="2" />
+            <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+          </svg>
+        </div>
+        <form id="loginForm">
+          <div class="form-group">
+            <label>ایمیل</label>
+            <input type="email" id="loginEmail" required autocomplete="username" />
+          </div>
+          <div class="form-group" style="margin-bottom:4px;">
+            <label>رمز عبور</label>
+            <input type="password" id="loginPassword" required autocomplete="current-password" />
+          </div>
+          <span class="field-error" id="loginError">ایمیل یا رمز عبور صحیح نیست</span>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-outline" data-close="loginModalOverlay" type="button">انصراف</button>
+        <button class="btn btn-primary" id="submitLoginBtn" type="button">ورود</button>
+      </div>
+    </div>
+  </div>
 
-    if(!ONLINE_MODE){
-      if(editingId){
-        const old=localPeople.find(p=>String(p.id)===String(editingId));
-        payload.photo = file ? await readLocalImage(file) : (old?.photo || "");
-        localPeople=localPeople.map(p=>String(p.id)===String(editingId)?{...p,...payload}:p);
-      }else{
-        payload.photo = file ? await readLocalImage(file) : "";
-        localPeople.push({...payload,id:String(Date.now())});
+  <!-- ============================================================
+     Modal: Confirm (Delete)
+     ============================================================ -->
+  <div class="modal-overlay" id="confirmModalOverlay">
+    <div class="modal-box">
+      <div class="modal-body">
+        <div class="confirm-body">
+          <div class="confirm-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M3 6h18" />
+              <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+              <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
+            </svg>
+          </div>
+          <h3 id="confirmTitle">حذف این شخص؟</h3>
+          <p id="confirmMessage">این عملیات قابل بازگشت نیست.</p>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-outline" data-close="confirmModalOverlay" type="button">انصراف</button>
+        <button class="btn" style="background:var(--color-danger);color:#fff;" id="confirmActionBtn"
+          type="button">حذف</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toastWrap"></div>
+
+  <script>
+    /* ============================================================
+       پیکربندی Supabase
+       پیش از انتشار، این دو مقدار را با اطلاعات پروژه خودتان جایگزین کنید.
+       فقط از Publishable / Anon Key استفاده کنید — هرگز Service Role Key.
+       ============================================================ */
+    const SUPABASE_URL = 'https://zkvvyocmwuuyctmeizby.supabase.co';
+    const SUPABASE_ANON_KEY = 'sb_publishable_Syj62cfIl4534Wffxj69rA_3SoTeHxB';
+    const PHOTO_BUCKET = 'teacher-photos';
+    const MAX_PHOTO_MB = 3;
+    const ALLOWED_PHOTO_TYPES = ['image/png', 'image/jpeg', 'image/webp'];
+
+    const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    /* ============================================================
+       وضعیت برنامه
+       ============================================================ */
+    let allPeople = [];
+    let currentSession = null;
+    let editingPersonId = null;
+    let pendingPhotoFile = null;
+    let photoWasRemoved = false;
+    let deleteTargetId = null;
+    let sortKey = null;
+    let sortDir = 'asc';
+    const deptColorMap = {};
+    const DEPT_COLOR_KEYS = ['1', '2', '3', '4', '5', '6'];
+
+    /* ============================================================
+       Dropdown سفارشی (جایگزین <select> پیش‌فرض برای تجربه نرم‌تر)
+       ============================================================ */
+    function initCustomDropdown(rootId, onChange) {
+      const root = document.getElementById(rootId);
+      const trigger = root.querySelector('.dropdown-trigger');
+      const valEl = trigger.querySelector('.val');
+      const panel = root.querySelector('.dropdown-panel');
+      let value = root.querySelector('.dropdown-option.selected')?.getAttribute('data-value') ?? '';
+
+      function open() {
+        document.querySelectorAll('.dropdown.open').forEach(d => {if (d !== root) closeDropdown(d);});
+        root.classList.add('open');
+        trigger.setAttribute('aria-expanded', 'true');
       }
+      function close() {
+        root.classList.remove('open');
+        trigger.setAttribute('aria-expanded', 'false');
+      }
+      function closeDropdown(el) {el.classList.remove('open');}
 
-      localStorage.setItem("university_people",JSON.stringify(localPeople));
-      $("personDialog").close();
-      await loadPeople();
-      showMessage("اطلاعات ذخیره شد.");
-      return;
+      function bindOptions() {
+        panel.querySelectorAll('.dropdown-option').forEach(opt => {
+          opt.addEventListener('click', () => {
+            value = opt.getAttribute('data-value');
+            panel.querySelectorAll('.dropdown-option').forEach(o => o.classList.toggle('selected', o === opt));
+            valEl.textContent = opt.querySelector('span').textContent;
+            close();
+            if (onChange) onChange(value);
+          });
+        });
+      }
+      bindOptions();
+
+      trigger.addEventListener('click', (e) => {
+        e.stopPropagation();
+        root.classList.contains('open') ? close() : open();
+      });
+      document.addEventListener('click', (e) => {
+        if (!root.contains(e.target)) close();
+      });
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') close();
+      });
+
+      return {
+        getValue: () => value,
+        setOptions(options, selectedValue) {
+          panel.innerHTML = options.map(o => `
+        <div class="dropdown-option${o.value === selectedValue ? ' selected' : ''}" data-value="${escapeHtml(o.value)}">
+          <span>${escapeHtml(o.label)}</span>
+          <svg class="check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>`).join('');
+          value = selectedValue;
+          const selectedOpt = options.find(o => o.value === selectedValue);
+          valEl.textContent = selectedOpt ? selectedOpt.label : (options[0] ? options[0].label : '');
+          bindOptions();
+        }
+      };
     }
 
-    if(file){
-      payload.photo = await uploadTeacherPhoto(file);
+    const searchTypeDropdown = initCustomDropdown('searchTypeDropdown', () => onSearchChange());
+    const departmentDropdown = initCustomDropdown('departmentDropdown', () => onSearchChange());
+
+    /* ============================================================
+       ابزارهای کمکی — نرمال‌سازی متن فارسی برای جستجو
+       ============================================================ */
+    function normalizeFa(str) {
+      if (!str) return '';
+      return String(str)
+        .replace(/[\u200c\u200d\u200e\u200f]/g, ' ')
+        .replace(/ي/g, 'ی')
+        .replace(/ك/g, 'ک')
+        .replace(/[أإآ]/g, 'ا')
+        .replace(/ة/g, 'ه')
+        .replace(/ؤ/g, 'و')
+        .replace(/ئ/g, 'ی')
+        .replace(/[\u064B-\u065F\u0670\u06D6-\u06ED]/g, '')
+        .replace(/[۰-۹]/g, d => '0123456789'['۰۱۲۳۴۵۶۷۸۹'.indexOf(d)])
+        .replace(/[٠-٩]/g, d => '0123456789'['٠١٢٣٤٥٦٧٨٩'.indexOf(d)])
+        .replace(/\s+/g, ' ')
+        .trim()
+        .toLowerCase();
     }
 
-    const result=editingId
-      ? await sb.from("people").update(payload).eq("id",editingId)
-      : await sb.from("people").insert(payload);
+    function getInitials(first, last) {
+      const a = (first || '').trim().charAt(0);
+      const b = (last || '').trim().charAt(0);
+      return (a + b) || '?';
+    }
 
-    if(result.error) throw result.error;
+    function getDeptColorVar(dept) {
+      const key = (dept || '').trim() || '_none_';
+      if (!deptColorMap[key]) {
+        const idx = Object.keys(deptColorMap).length % DEPT_COLOR_KEYS.length;
+        deptColorMap[key] = DEPT_COLOR_KEYS[idx];
+      }
+      return deptColorMap[key];
+    }
 
-    $("personDialog").close();
-    await loadPeople();
-    showMessage("اطلاعات ذخیره شد.");
-  }catch(error){
-    console.error(error);
-    showMessage("ذخیره انجام نشد: "+(error.message||"خطای نامشخص"),"error");
-  }
-}
+    function escapeHtml(str) {
+      if (str === null || str === undefined) return '';
+      return String(str)
+        .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+    }
 
-async function deletePerson(id){
-if(!confirm("آیا از حذف این شخص مطمئن هستید؟"))return
-if(!ONLINE_MODE){localPeople=localPeople.filter(p=>String(p.id)!==String(id));localStorage.setItem("university_people",JSON.stringify(localPeople));await loadPeople();showMessage("شخص حذف شد.");return}
-const {error}=await sb.from("people").delete().eq("id",id);if(error){showMessage("حذف انجام نشد: "+error.message,"error");return}await loadPeople();showMessage("شخص حذف شد.")
-}
+    function toast(message, type) {
+      const wrap = document.getElementById('toastWrap');
+      const el = document.createElement('div');
+      el.className = 'toast' + (type ? ' ' + type : '');
+      el.textContent = message;
+      wrap.appendChild(el);
+      setTimeout(() => {el.remove();}, 3200);
+    }
 
-$("loginForm").onsubmit=async e=>{
-e.preventDefault()
-if(!ONLINE_MODE){
-if($("loginEmail").value.trim()===DEMO_ADMIN_EMAIL&&$("loginPassword").value===DEMO_ADMIN_PASSWORD){localStorage.setItem("demo_admin","1");$("loginDialog").close();isAdmin=true;renderAuth();await loadPeople();showMessage("ورود مدیر موفق بود.")}else showMessage("در حالت محلی: ایمیل admin@university.local و رمز 1234 است.","error");return}
-const {error}=await sb.auth.signInWithPassword({email:$("loginEmail").value.trim(),password:$("loginPassword").value});if(error){showMessage("ورود مدیر ناموفق بود: "+error.message,"error");return}$("loginDialog").close();await refreshAuth();await loadPeople();showMessage("ورود مدیر موفق بود.")
-}
-$("personForm").onsubmit=savePerson;$("searchBtn").onclick=loadPeople;$("clearBtn").onclick=()=>{$("searchText").value="";$("searchType").value="all";$("department").value="";loadPeople()};$("searchText").addEventListener("keydown",e=>{if(e.key==="Enter")loadPeople()})
+    /* ============================================================
+       کنترل Modal‌ها
+       ============================================================ */
+    function openModal(id) {
+      document.getElementById(id).classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
+    function closeModal(id) {
+      document.getElementById(id).classList.remove('open');
+      document.body.style.overflow = '';
+    }
+    document.querySelectorAll('[data-close]').forEach(btn => {
+      btn.addEventListener('click', () => closeModal(btn.getAttribute('data-close')));
+    });
+    document.querySelectorAll('.modal-overlay').forEach(overlay => {
+      overlay.addEventListener('click', (e) => {
+        if (e.target === overlay) closeModal(overlay.id);
+      });
+    });
 
-$("photoFile").addEventListener("change", function(){
-  const file=this.files[0];
-  const box=$("photoPreviewBox");
-  if(!file){
-    box.className="photo-empty";
-    box.textContent="بدون تصویر";
-    return;
-  }
-  const reader=new FileReader();
-  reader.onload=()=>{
-    box.className="";
-    box.innerHTML=`<img src="${reader.result}" alt="">`;
-  };
-  reader.readAsDataURL(file);
-});
+    /* ============================================================
+       احراز هویت مدیر
+       ============================================================ */
+    async function checkSession() {
+      const {data} = await sb.auth.getSession();
+      currentSession = data.session;
+      updateAuthUI();
+    }
 
-async function init(){$("modeText").textContent=ONLINE_MODE?"داده‌ها مشترک و آنلاین هستند.":"نسخه آماده است؛ برای آنلاین شدن Supabase را تنظیم کنید.";await refreshAuth();await loadPeople();if(ONLINE_MODE)sb.auth.onAuthStateChange(async()=>{await refreshAuth();await loadPeople()})}
-init()
-</script>
-</body></html>
+    sb.auth.onAuthStateChange((_event, session) => {
+      currentSession = session;
+      updateAuthUI();
+      renderResults(getFilteredPeople());
+    });
+
+    function isAdmin() {
+      return !!currentSession;
+    }
+
+    function updateAuthUI() {
+      const headerActions = document.getElementById('headerActions');
+      const adminToolbar = document.getElementById('adminToolbar');
+      if (isAdmin()) {
+        headerActions.innerHTML = `
+      <div class="admin-chip"><span class="dot"></span> ${escapeHtml(currentSession.user.email)}</div>
+    `;
+        adminToolbar.style.display = 'flex';
+      } else {
+        headerActions.innerHTML = `
+      <button class="btn btn-ghost-light" id="loginBtn" type="button">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+        ورود مدیر
+      </button>
+    `;
+        document.getElementById('loginBtn').addEventListener('click', () => openModal('loginModalOverlay'));
+        adminToolbar.style.display = 'none';
+      }
+    }
+
+    document.getElementById('logoutBtn').addEventListener('click', async () => {
+      await sb.auth.signOut();
+      toast('از حساب مدیر خارج شدید', 'success');
+    });
+
+    document.getElementById('submitLoginBtn').addEventListener('click', async () => {
+      const email = document.getElementById('loginEmail').value.trim();
+      const password = document.getElementById('loginPassword').value;
+      const errEl = document.getElementById('loginError');
+      errEl.style.display = 'none';
+      if (!email || !password) {
+        errEl.textContent = 'ایمیل و رمز عبور را وارد کنید';
+        errEl.style.display = 'block';
+        return;
+      }
+      const btn = document.getElementById('submitLoginBtn');
+      btn.disabled = true; btn.textContent = 'در حال ورود...';
+      const {error} = await sb.auth.signInWithPassword({email, password});
+      btn.disabled = false; btn.textContent = 'ورود';
+      if (error) {
+        errEl.textContent = 'ایمیل یا رمز عبور صحیح نیست';
+        errEl.style.display = 'block';
+        return;
+      }
+      closeModal('loginModalOverlay');
+      document.getElementById('loginForm').reset();
+      toast('با موفقیت وارد شدید', 'success');
+    });
+
+    /* initial header login button (before first auth state resolves) */
+    document.getElementById('loginBtn').addEventListener('click', () => openModal('loginModalOverlay'));
+
+    /* ============================================================
+       دریافت داده از Supabase
+       ============================================================ */
+    async function fetchPeople() {
+      document.getElementById('loadingIndicator').classList.remove('hidden');
+      document.getElementById('tableWrap').classList.add('hidden');
+      document.getElementById('cardsWrap').classList.add('hidden');
+      document.getElementById('emptyState').classList.add('hidden');
+
+      const {data, error} = await sb.from('people').select('*').order('created_at', {ascending: false});
+
+      document.getElementById('loadingIndicator').classList.add('hidden');
+
+      if (error) {
+        toast('خطا در دریافت اطلاعات از سرور', 'error');
+        console.error(error);
+        allPeople = [];
+      } else {
+        allPeople = data || [];
+      }
+      populateDepartmentFilter();
+      renderResults(getFilteredPeople());
+    }
+
+    function populateDepartmentFilter() {
+      const current = departmentDropdown.getValue();
+      const depts = Array.from(new Set(allPeople.map(p => (p.department || '').trim()).filter(Boolean))).sort();
+      const options = [{value: '', label: 'همه دانشکده‌ها / گروه‌ها'}]
+        .concat(depts.map(d => ({value: d, label: d})));
+      departmentDropdown.setOptions(options, depts.includes(current) ? current : '');
+    }
+
+    /* ============================================================
+       جستجو و فیلتر
+       ============================================================ */
+    function getFilteredPeople() {
+      const query = normalizeFa(document.getElementById('searchInput').value);
+      const type = searchTypeDropdown.getValue();
+      const dept = departmentDropdown.getValue();
+
+      return allPeople.filter(p => {
+        if (dept && (p.department || '').trim() !== dept) return false;
+        if (!query) return true;
+
+        if (type === 'first_name') return normalizeFa(p.first_name).includes(query);
+        if (type === 'last_name') return normalizeFa(p.last_name).includes(query);
+        if (type === 'position') return normalizeFa(p.position).includes(query);
+
+        const haystack = normalizeFa([
+          p.first_name, p.last_name, p.position, p.phone, p.email, p.department, p.office
+        ].filter(Boolean).join(' '));
+        return haystack.includes(query);
+      }).sort(sortComparator);
+    }
+
+    function sortComparator(a, b) {
+      if (!sortKey) return 0;
+      let valA, valB;
+      if (sortKey === 'name') {
+        valA = `${a.first_name || ''} ${a.last_name || ''}`.trim();
+        valB = `${b.first_name || ''} ${b.last_name || ''}`.trim();
+      } else if (sortKey === 'position') {
+        valA = a.position || '';
+        valB = b.position || '';
+      } else if (sortKey === 'department') {
+        valA = a.department || '';
+        valB = b.department || '';
+      } else {
+        return 0;
+      }
+      const result = valA.localeCompare(valB, 'fa');
+      return sortDir === 'asc' ? result : -result;
+    }
+
+    function updateSortHeaderUI() {
+      document.querySelectorAll('table.people-table thead th.sortable').forEach(th => {
+        const key = th.getAttribute('data-sort');
+        th.classList.toggle('active', key === sortKey);
+        th.classList.toggle('desc', key === sortKey && sortDir === 'desc');
+      });
+    }
+
+    let searchDebounce;
+    function onSearchChange() {
+      clearTimeout(searchDebounce);
+      searchDebounce = setTimeout(() => renderResults(getFilteredPeople()), 180);
+    }
+    document.getElementById('searchInput').addEventListener('input', onSearchChange);
+
+    document.querySelectorAll('table.people-table thead th.sortable').forEach(th => {
+      th.addEventListener('click', () => {
+        const key = th.getAttribute('data-sort');
+        if (sortKey === key) {
+          sortDir = sortDir === 'asc' ? 'desc' : 'asc';
+        } else {
+          sortKey = key;
+          sortDir = 'asc';
+        }
+        updateSortHeaderUI();
+        renderResults(getFilteredPeople());
+      });
+    });
+
+    /* ============================================================
+       رندر نتایج
+       ============================================================ */
+    function renderResults(list) {
+      const count = list.length;
+      document.getElementById('resultCount').innerHTML = `<b>${count.toLocaleString('fa-IR')}</b> نفر یافت شد`;
+
+      const tableWrap = document.getElementById('tableWrap');
+      const cardsWrap = document.getElementById('cardsWrap');
+      const emptyState = document.getElementById('emptyState');
+
+      if (count === 0) {
+        tableWrap.classList.add('hidden');
+        cardsWrap.classList.add('hidden');
+        emptyState.classList.remove('hidden');
+        return;
+      }
+      emptyState.classList.add('hidden');
+      tableWrap.classList.remove('hidden');
+      cardsWrap.classList.remove('hidden');
+
+      renderTable(list);
+      renderCards(list);
+    }
+
+    function avatarHtml(p, sizeClass) {
+      const colorKey = getDeptColorVar(p.department);
+      const style = `background:var(--dept-${colorKey})`;
+      if (p.photo) {
+        return `<div class="avatar ${sizeClass || ''}"><img src="${escapeHtml(p.photo)}" alt="${escapeHtml(p.first_name + ' ' + p.last_name)}" loading="lazy" /></div>`;
+      }
+      return `<div class="avatar ${sizeClass || ''}" style="${style}">${escapeHtml(getInitials(p.first_name, p.last_name))}</div>`;
+    }
+
+    function renderTable(list) {
+      const tbody = document.getElementById('tableBody');
+      tbody.innerHTML = list.map(p => {
+        const colorKey = getDeptColorVar(p.department);
+        return `
+    <tr>
+      <td>
+        <div class="person-name-cell">
+          ${avatarHtml(p)}
+          <div class="meta">
+            <b>${escapeHtml(p.first_name)} ${escapeHtml(p.last_name)}</b>
+            ${p.office ? `<small>${escapeHtml(p.office)}</small>` : ''}
+          </div>
+        </div>
+      </td>
+      <td>${escapeHtml(p.position)}</td>
+      <td>${p.department ? `<span class="badge" style="background:var(--dept-${colorKey}-soft);color:var(--dept-${colorKey})">${escapeHtml(p.department)}</span>` : '<span style="color:var(--color-text-faint)">—</span>'}</td>
+      <td>${p.phone ? `<a href="tel:${escapeHtml(p.phone)}" style="color:var(--color-text);text-decoration:none;">${escapeHtml(p.phone)}</a>` : '<span style="color:var(--color-text-faint)">—</span>'}</td>
+      <td>
+        <div class="action-cell">
+          <button class="btn btn-soft btn-icon" title="مشاهده" data-view="${p.id}" type="button">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          </button>
+          ${isAdmin() ? `
+          <button class="btn btn-outline btn-icon" title="ویرایش" data-edit="${p.id}" type="button">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+          </button>
+          <button class="btn btn-danger-soft btn-icon" title="حذف" data-delete="${p.id}" type="button">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
+          </button>` : ''}
+        </div>
+      </td>
+    </tr>`;
+      }).join('');
+      bindRowActions(tbody);
+    }
+
+    function renderCards(list) {
+      const wrap = document.getElementById('cardsWrap');
+      wrap.innerHTML = list.map(p => {
+        const colorKey = getDeptColorVar(p.department);
+        return `
+    <div class="person-card" style="--dept-color:var(--dept-${colorKey})">
+      <div class="person-card-head">
+        ${avatarHtml(p)}
+        <div class="info">
+          <b>${escapeHtml(p.first_name)} ${escapeHtml(p.last_name)}</b>
+          <span>${escapeHtml(p.position)}</span>
+        </div>
+      </div>
+      <div class="person-card-body">
+        ${p.department ? `<div class="row"><span class="badge" style="background:var(--dept-${colorKey}-soft);color:var(--dept-${colorKey})">${escapeHtml(p.department)}</span></div>` : ''}
+        ${p.phone ? `<div class="row">📞 ${escapeHtml(p.phone)}</div>` : ''}
+      </div>
+      <div class="person-card-actions">
+        <button class="btn btn-soft btn-sm" data-view="${p.id}" type="button">مشاهده اطلاعات</button>
+        ${p.phone ? `<a class="btn btn-success btn-sm" href="tel:${escapeHtml(p.phone)}">تماس</a>` : ''}
+        ${p.email ? `<a class="btn btn-outline btn-sm" href="mailto:${escapeHtml(p.email)}">ایمیل</a>` : ''}
+        ${isAdmin() ? `
+        <button class="btn btn-outline btn-sm" data-edit="${p.id}" type="button">ویرایش</button>
+        <button class="btn btn-danger-soft btn-sm" data-delete="${p.id}" type="button">حذف</button>` : ''}
+      </div>
+    </div>`;
+      }).join('');
+      bindRowActions(wrap);
+    }
+
+    function bindRowActions(container) {
+      container.querySelectorAll('[data-view]').forEach(btn => {
+        btn.addEventListener('click', () => openDetailModal(btn.getAttribute('data-view')));
+      });
+      container.querySelectorAll('[data-edit]').forEach(btn => {
+        btn.addEventListener('click', () => openPersonModal(btn.getAttribute('data-edit')));
+      });
+      container.querySelectorAll('[data-delete]').forEach(btn => {
+        btn.addEventListener('click', () => openDeleteConfirm(btn.getAttribute('data-delete')));
+      });
+    }
+
+    /* ============================================================
+       Modal جزئیات
+       ============================================================ */
+    function openDetailModal(id) {
+      const p = allPeople.find(x => String(x.id) === String(id));
+      if (!p) return;
+
+      document.getElementById('detailAvatar').outerHTML = avatarHtml(p, 'avatar-lg').replace('class="avatar', 'id="detailAvatar" class="avatar');
+      document.getElementById('detailName').textContent = `${p.first_name} ${p.last_name}`;
+      document.getElementById('detailPosition').textContent = p.position || '';
+
+      setDetailRow('detailDeptRow', 'detailDept', p.department);
+      setDetailRow('detailOfficeRow', 'detailOffice', p.office);
+      setDetailRow('detailPhoneRow', 'detailPhone', p.phone);
+      setDetailRow('detailEmailRow', 'detailEmail', p.email);
+
+      const callBtn = document.getElementById('detailCallBtn');
+      const emailBtn = document.getElementById('detailEmailBtn');
+      if (p.phone) {callBtn.href = 'tel:' + p.phone; callBtn.classList.remove('hidden');}
+      else callBtn.classList.add('hidden');
+      if (p.email) {emailBtn.href = 'mailto:' + p.email; emailBtn.classList.remove('hidden');}
+      else emailBtn.classList.add('hidden');
+
+      openModal('detailModalOverlay');
+    }
+    function setDetailRow(rowId, spanId, value) {
+      const row = document.getElementById(rowId);
+      const span = document.getElementById(spanId);
+      if (value) {row.classList.remove('hidden'); span.textContent = value;}
+      else row.classList.add('hidden');
+    }
+
+    /* ============================================================
+       Modal افزودن / ویرایش
+       ============================================================ */
+    document.getElementById('addPersonBtn').addEventListener('click', () => openPersonModal(null));
+
+    function openPersonModal(id) {
+      editingPersonId = id;
+      pendingPhotoFile = null;
+      photoWasRemoved = false;
+      document.getElementById('personForm').reset();
+      clearFormErrors();
+
+      const preview = document.getElementById('photoPreview');
+      const removeBtn = document.getElementById('removePhotoBtn');
+
+      if (id) {
+        const p = allPeople.find(x => String(x.id) === String(id));
+        if (!p) return;
+        document.getElementById('personModalTitle').textContent = 'ویرایش اطلاعات شخص';
+        document.getElementById('firstNameInput').value = p.first_name || '';
+        document.getElementById('lastNameInput').value = p.last_name || '';
+        document.getElementById('positionInput').value = p.position || '';
+        document.getElementById('departmentInput').value = p.department || '';
+        document.getElementById('officeInput').value = p.office || '';
+        document.getElementById('phoneInput').value = p.phone || '';
+        document.getElementById('emailInput').value = p.email || '';
+        if (p.photo) {
+          preview.innerHTML = `<img src="${escapeHtml(p.photo)}" alt="" />`;
+          removeBtn.classList.remove('hidden');
+        } else {
+          preview.innerHTML = defaultPreviewIcon();
+          removeBtn.classList.add('hidden');
+        }
+      } else {
+        document.getElementById('personModalTitle').textContent = 'افزودن شخص جدید';
+        preview.innerHTML = defaultPreviewIcon();
+        removeBtn.classList.add('hidden');
+      }
+      openModal('personModalOverlay');
+    }
+
+    function defaultPreviewIcon() {
+      return `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>`;
+    }
+
+    document.getElementById('photoInput').addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      if (!ALLOWED_PHOTO_TYPES.includes(file.type)) {
+        toast('فرمت فایل باید PNG، JPG یا WEBP باشد', 'error');
+        e.target.value = '';
+        return;
+      }
+      if (file.size > MAX_PHOTO_MB * 1024 * 1024) {
+        toast(`حجم فایل نباید بیشتر از ${MAX_PHOTO_MB} مگابایت باشد`, 'error');
+        e.target.value = '';
+        return;
+      }
+      pendingPhotoFile = file;
+      photoWasRemoved = false;
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        document.getElementById('photoPreview').innerHTML = `<img src="${ev.target.result}" alt="" />`;
+        document.getElementById('removePhotoBtn').classList.remove('hidden');
+      };
+      reader.readAsDataURL(file);
+    });
+
+    document.getElementById('removePhotoBtn').addEventListener('click', () => {
+      pendingPhotoFile = null;
+      photoWasRemoved = true;
+      document.getElementById('photoInput').value = '';
+      document.getElementById('photoPreview').innerHTML = defaultPreviewIcon();
+      document.getElementById('removePhotoBtn').classList.add('hidden');
+    });
+
+    function clearFormErrors() {
+      ['fgFirstName', 'fgLastName', 'fgPosition', 'fgEmail'].forEach(id => {
+        document.getElementById(id).classList.remove('error');
+      });
+    }
+
+    function validateForm() {
+      clearFormErrors();
+      let valid = true;
+      const firstName = document.getElementById('firstNameInput').value.trim();
+      const lastName = document.getElementById('lastNameInput').value.trim();
+      const position = document.getElementById('positionInput').value.trim();
+      const email = document.getElementById('emailInput').value.trim();
+
+      if (!firstName) {document.getElementById('fgFirstName').classList.add('error'); valid = false;}
+      if (!lastName) {document.getElementById('fgLastName').classList.add('error'); valid = false;}
+      if (!position) {document.getElementById('fgPosition').classList.add('error'); valid = false;}
+      if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        document.getElementById('fgEmail').classList.add('error'); valid = false;
+      }
+      return valid;
+    }
+
+    /* ---- عملیات عکس در Supabase Storage ---- */
+    async function uploadPhoto(file) {
+      const ext = (file.name.split('.').pop() || 'jpg').toLowerCase();
+      const path = `${crypto.randomUUID()}.${ext}`;
+      const {error} = await sb.storage.from(PHOTO_BUCKET).upload(path, file, {
+        cacheControl: '3600',
+        upsert: false
+      });
+      if (error) throw error;
+      const {data} = sb.storage.from(PHOTO_BUCKET).getPublicUrl(path);
+      return data.publicUrl;
+    }
+
+    function extractStoragePath(url) {
+      if (!url) return null;
+      const marker = `/object/public/${PHOTO_BUCKET}/`;
+      const idx = url.indexOf(marker);
+      if (idx === -1) return null;
+      return url.substring(idx + marker.length);
+    }
+
+    async function deletePhotoByUrl(url) {
+      const path = extractStoragePath(url);
+      if (!path) return;
+      try {
+        await sb.storage.from(PHOTO_BUCKET).remove([path]);
+      } catch (err) {
+        console.error('حذف فایل تصویر با خطا مواجه شد', err);
+      }
+    }
+
+    /* ---- ذخیره (افزودن یا ویرایش) ---- */
+    document.getElementById('savePersonBtn').addEventListener('click', async () => {
+      if (!validateForm()) return;
+
+      const btn = document.getElementById('savePersonBtn');
+      btn.disabled = true;
+      btn.textContent = 'در حال ذخیره...';
+
+      try {
+        const existing = editingPersonId ? allPeople.find(x => String(x.id) === String(editingPersonId)) : null;
+        let photoUrl = existing ? existing.photo : null;
+
+        if (pendingPhotoFile) {
+          const newUrl = await uploadPhoto(pendingPhotoFile);
+          if (existing && existing.photo) {
+            await deletePhotoByUrl(existing.photo);
+          }
+          photoUrl = newUrl;
+        } else if (photoWasRemoved) {
+          if (existing && existing.photo) {
+            await deletePhotoByUrl(existing.photo);
+          }
+          photoUrl = null;
+        }
+
+        const payload = {
+          first_name: document.getElementById('firstNameInput').value.trim(),
+          last_name: document.getElementById('lastNameInput').value.trim(),
+          position: document.getElementById('positionInput').value.trim(),
+          department: document.getElementById('departmentInput').value.trim() || null,
+          office: document.getElementById('officeInput').value.trim() || null,
+          phone: document.getElementById('phoneInput').value.trim() || null,
+          email: document.getElementById('emailInput').value.trim() || null,
+          photo: photoUrl
+        };
+
+        let error;
+        if (editingPersonId) {
+          ({error} = await sb.from('people').update(payload).eq('id', editingPersonId));
+        } else {
+          ({error} = await sb.from('people').insert(payload));
+        }
+
+        if (error) throw error;
+
+        closeModal('personModalOverlay');
+        toast(editingPersonId ? 'اطلاعات با موفقیت ویرایش شد' : 'شخص جدید با موفقیت اضافه شد', 'success');
+        await fetchPeople();
+      } catch (err) {
+        console.error(err);
+        toast('خطا در ذخیره اطلاعات — دوباره تلاش کنید', 'error');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'ذخیره اطلاعات';
+      }
+    });
+
+    /* ============================================================
+       حذف شخص
+       ============================================================ */
+    function openDeleteConfirm(id) {
+      const p = allPeople.find(x => String(x.id) === String(id));
+      if (!p) return;
+      deleteTargetId = id;
+      document.getElementById('confirmTitle').textContent = `حذف ${p.first_name} ${p.last_name}؟`;
+      document.getElementById('confirmMessage').textContent = 'این عملیات قابل بازگشت نیست و اطلاعات این شخص به‌طور کامل حذف خواهد شد.';
+      openModal('confirmModalOverlay');
+    }
+
+    document.getElementById('confirmActionBtn').addEventListener('click', async () => {
+      if (!deleteTargetId) return;
+      const btn = document.getElementById('confirmActionBtn');
+      btn.disabled = true; btn.textContent = 'در حال حذف...';
+
+      try {
+        const p = allPeople.find(x => String(x.id) === String(deleteTargetId));
+        const {error} = await sb.from('people').delete().eq('id', deleteTargetId);
+        if (error) throw error;
+
+        if (p && p.photo) {
+          await deletePhotoByUrl(p.photo);
+        }
+        closeModal('confirmModalOverlay');
+        toast('شخص با موفقیت حذف شد', 'success');
+        await fetchPeople();
+      } catch (err) {
+        console.error(err);
+        toast('خطا در حذف اطلاعات', 'error');
+      } finally {
+        btn.disabled = false; btn.textContent = 'حذف';
+        deleteTargetId = null;
+      }
+    });
+
+    /* ============================================================
+       شروع برنامه
+       ============================================================ */
+    (async function init() {
+      await checkSession();
+      await fetchPeople();
+    })();
+  </script>
+</body>
+
+</html>
