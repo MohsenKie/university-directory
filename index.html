@@ -1322,7 +1322,7 @@
               <polyline points="10 17 15 12 10 7" />
               <line x1="15" y1="12" x2="3" y2="12" />
             </svg>
-            ورود مدیر
+            ورود / ثبت‌نام
           </button>
         </div>
       </div>
@@ -1652,7 +1652,7 @@
   <div class="modal-overlay" id="loginModalOverlay">
     <div class="modal-box">
       <div class="modal-header">
-        <h3>ورود مدیر</h3>
+        <h3>ورود به حساب کاربری</h3>
         <button class="modal-close" data-close="loginModalOverlay" aria-label="بستن" type="button">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4">
             <line x1="18" y1="6" x2="6" y2="18" />
@@ -1669,14 +1669,17 @@
         </div>
         <form id="loginForm">
           <div class="form-group">
-            <label>ایمیل</label>
-            <input type="email" id="loginEmail" required autocomplete="username" />
+            <label>شماره تلفن یا ایمیل مدیر</label>
+            <input type="text" id="loginIdentifier" inputmode="tel" placeholder="09xxxxxxxxx" required autocomplete="username" />
           </div>
           <div class="form-group" style="margin-bottom:4px;">
             <label>رمز عبور</label>
             <input type="password" id="loginPassword" required autocomplete="current-password" />
           </div>
-          <span class="field-error" id="loginError">ایمیل یا رمز عبور صحیح نیست</span>
+          <span class="field-error" id="loginError">شماره تلفن یا رمز عبور صحیح نیست</span>
+          <p style="font-size:12px;color:var(--color-text-soft);margin:14px 0 0;text-align:center;">
+            هنوز رمز نساخته‌اید؟ <a href="https://t.me/MarvIAUBot?start=website_password" target="_blank" rel="noopener" style="color:var(--color-primary);font-weight:700;text-decoration:none;">ساخت رمز از طریق ربات تلگرام</a>
+          </p>
         </form>
       </div>
       <div class="modal-footer">
@@ -1894,7 +1897,7 @@
     });
 
     function isAdmin() {
-      return !!currentSession;
+      return String(currentSession?.user?.email || '').toLowerCase() === 'fizacxo@gmail.com';
     }
 
     function updateAuthUI() {
@@ -1905,11 +1908,22 @@
       <div class="admin-chip"><span class="dot"></span> ${escapeHtml(currentSession.user.email)}</div>
     `;
         adminToolbar.style.display = 'flex';
+      } else if (currentSession) {
+        const userLabel = currentSession.user.phone || currentSession.user.user_metadata?.first_name || 'حساب کاربری';
+        headerActions.innerHTML = `
+          <div class="admin-chip"><span class="dot"></span> ${escapeHtml(userLabel)}</div>
+          <button class="btn btn-ghost-light" id="userLogoutBtn" type="button">خروج</button>
+        `;
+        document.getElementById('userLogoutBtn').addEventListener('click', async () => {
+          await sb.auth.signOut();
+          toast('از حساب کاربری خارج شدید', 'success');
+        });
+        adminToolbar.style.display = 'none';
       } else {
         headerActions.innerHTML = `
       <button class="btn btn-ghost-light" id="loginBtn" type="button">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
-        ورود مدیر
+        ورود / ثبت‌نام
       </button>
     `;
         document.getElementById('loginBtn').addEventListener('click', () => openModal('loginModalOverlay'));
@@ -1922,22 +1936,39 @@
       toast('از حساب مدیر خارج شدید', 'success');
     });
 
+    function normalizeLoginPhone(value) {
+      const digits = String(value || '').replace(/\\D/g, '');
+      if (digits.startsWith('0098') && digits.length === 14) return '+' + digits.slice(2);
+      if (digits.startsWith('98') && digits.length === 12) return '+' + digits;
+      if (digits.startsWith('0') && digits.length === 11) return '+98' + digits.slice(1);
+      if (digits.startsWith('9') && digits.length === 10) return '+98' + digits;
+      return null;
+    }
+
     document.getElementById('submitLoginBtn').addEventListener('click', async () => {
-      const email = document.getElementById('loginEmail').value.trim();
+      const identifier = document.getElementById('loginIdentifier').value.trim();
       const password = document.getElementById('loginPassword').value;
       const errEl = document.getElementById('loginError');
       errEl.style.display = 'none';
-      if (!email || !password) {
-        errEl.textContent = 'ایمیل و رمز عبور را وارد کنید';
+      if (!identifier || !password) {
+        errEl.textContent = 'شماره تلفن و رمز عبور را وارد کنید';
+        errEl.style.display = 'block';
+        return;
+      }
+      const credentials = identifier.includes('@')
+        ? { email: identifier, password }
+        : { phone: normalizeLoginPhone(identifier), password };
+      if (!credentials.email && !credentials.phone) {
+        errEl.textContent = 'شماره تلفن معتبر نیست';
         errEl.style.display = 'block';
         return;
       }
       const btn = document.getElementById('submitLoginBtn');
       btn.disabled = true; btn.textContent = 'در حال ورود...';
-      const {error} = await sb.auth.signInWithPassword({email, password});
+      const {error} = await sb.auth.signInWithPassword(credentials);
       btn.disabled = false; btn.textContent = 'ورود';
       if (error) {
-        errEl.textContent = 'ایمیل یا رمز عبور صحیح نیست';
+        errEl.textContent = 'شماره تلفن یا رمز عبور صحیح نیست';
         errEl.style.display = 'block';
         return;
       }
