@@ -1945,6 +1945,11 @@
       return null;
     }
 
+    function websiteLoginEmail(normalizedPhone) {
+      const digits = String(normalizedPhone || '').replace(/\D/g, '');
+      return digits ? 'u' + digits + '@login.marviau.invalid' : '';
+    }
+
     document.getElementById('submitLoginBtn').addEventListener('click', async () => {
       const identifier = document.getElementById('loginIdentifier').value.trim();
       const password = document.getElementById('loginPassword').value;
@@ -1955,10 +1960,11 @@
         errEl.style.display = 'block';
         return;
       }
+      const normalizedPhone = identifier.includes('@') ? null : normalizeLoginPhone(identifier);
       const credentials = identifier.includes('@')
         ? { email: identifier, password }
-        : { phone: normalizeLoginPhone(identifier), password };
-      if (!credentials.email && !credentials.phone) {
+        : { email: normalizedPhone ? websiteLoginEmail(normalizedPhone) : '', password };
+      if (!credentials.email) {
         errEl.textContent = 'شماره تلفن معتبر نیست';
         errEl.style.display = 'block';
         return;
